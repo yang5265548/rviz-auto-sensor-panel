@@ -58,6 +58,7 @@ Requirements baseline:
 - [User Installation / 用户安装指南](./docs/0007-user-installation.md)
 - [Release Readiness / 发布准备度](./docs/0008-release-readiness.md)
 - [Maintainer Workflow / 维护者流程](./docs/0009-maintainer-workflow.md)
+- [Main Merge Checklist / 合并清单](./docs/0010-main-merge-checklist.md)
 
 默认规则配置文件：  
 Default rules configuration file:
