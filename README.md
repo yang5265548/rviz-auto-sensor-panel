@@ -56,6 +56,7 @@ Requirements baseline:
 - [Quick Start / 快速启动](./docs/0005-quick-start.md)
 - [Topic Grouping Rules / Topic 分组规则](./docs/0006-topic-grouping-rules.md)
 - [User Installation / 用户安装指南](./docs/0007-user-installation.md)
+- [Release Readiness / 发布准备度](./docs/0008-release-readiness.md)
 
 默认规则配置文件：  
 Default rules configuration file:
@@ -63,6 +64,12 @@ Default rules configuration file:
 - `config/topic_grouping_rules.ini`
 - `config/example_topic_grouping_rules.ini`
 - `config/default_demo.rviz`
+
+仓库级文件：  
+Repository-level files:
+
+- `LICENSE`
+- `CHANGELOG.md`
 
 ## 计划目录 | Planned Structure
 
