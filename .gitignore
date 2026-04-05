@@ -1,0 +1,30 @@
+# OS / editor
+.DS_Store
+.vscode/
+.idea/
+
+# Python
+__pycache__/
+*.pyc
+
+# Build outputs
+build/
+install/
+log/
+dist/
+
+# CMake
+CMakeCache.txt
+CMakeFiles/
+cmake-build-*/
+compile_commands.json
+
+# Colcon / ROS 2
+*.repos
+
+# Testing
+coverage/
+*.gcda
+*.gcno
+*.profraw
+*.profdata
