@@ -112,6 +112,8 @@ The panel now also supports these lower-effort interactions:
   `Enable All`: enable all discovered topics at once
 - `Disable All`：一次关闭所有已发现 topic  
   `Disable All`: disable all discovered topics at once
+- 设备组和分类节点也可以直接勾选，用来批量控制其下所有 topic  
+  Device-group and category nodes can also be checked directly to control all descendant topics in one action
 - 用户手动关闭过的 topic 会被记住，不会因为后续刷新立即自动打开  
   Topics manually turned off by the user are remembered and should not immediately auto-enable again on refresh
 

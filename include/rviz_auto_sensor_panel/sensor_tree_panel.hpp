@@ -51,6 +51,13 @@ private:
   void syncEnabledTopicsFromTree();
   void reconcileDesiredDisplays();
   void setAllTopicsEnabled(bool enabled);
+  void setDescendantTopicsEnabled(QTreeWidgetItem * root_item, bool enabled);
+  void applyTopicEnabledState(
+    const std::string & topic_name,
+    const std::string & message_type,
+    bool enabled,
+    QTreeWidgetItem * item);
+  Qt::CheckState determineAggregateCheckState(const QTreeWidgetItem * item) const;
   bool shouldTopicStartEnabled(const std::string & topic_name) const;
   bool shouldGroupStartExpanded(const std::string & group_key) const;
   void rememberGroupExpansionStates();

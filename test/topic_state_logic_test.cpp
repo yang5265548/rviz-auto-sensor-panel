@@ -67,4 +67,22 @@ TEST(TopicStateLogicTest, disableAllSuppressesEveryKnownTopic)
   EXPECT_EQ(suppressed_topics.size(), 2u);
 }
 
+TEST(TopicStateLogicTest, enableAllClearsSuppressionForEveryKnownTopic)
+{
+  std::set<std::string> enabled_topics;
+  std::set<std::string> suppressed_topics{
+    "/demo/front/scan",
+    "/demo/camera/left/image_raw"
+  };
+  const std::vector<DiscoveredTopic> topics{
+    DiscoveredTopic{"/demo/front/scan", "sensor_msgs/msg/LaserScan", SensorCategory::Lidar, true},
+    DiscoveredTopic{"/demo/camera/left/image_raw", "sensor_msgs/msg/Image", SensorCategory::Camera, true}
+  };
+
+  setAllTopicStates(topics, true, &enabled_topics, &suppressed_topics);
+
+  EXPECT_EQ(enabled_topics.size(), 2u);
+  EXPECT_TRUE(suppressed_topics.empty());
+}
+
 }  // namespace rviz_auto_sensor_panel

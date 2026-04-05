@@ -173,35 +173,58 @@ void SensorTreePanel::handleRefreshClicked()
 
 void SensorTreePanel::handleTreeItemChanged(QTreeWidgetItem * item, int column)
 {
-  if (!item || column != kNameColumn || item->childCount() > 0) {
+  if (!item || column != kNameColumn) {
+    return;
+  }
+
+  const auto item_type = static_cast<TreeItemType>(
+    item->data(kNameColumn, kTreeItemTypeRole).toInt());
+  const auto desired_state = item->checkState(kNameColumn);
+
+  if (item_type != TreeItemType::Topic) {
+    if (desired_state == Qt::PartiallyChecked) {
+      return;
+    }
+
+    setDescendantTopicsEnabled(item, desired_state == Qt::Checked);
+    rememberGroupExpansionStates();
+    rebuildTree();
+    reconcileDesiredDisplays();
+    updateStatusLabel();
+    Q_EMIT configChanged();
     return;
   }
 
   const auto topic_name = item->data(kNameColumn, Qt::UserRole).toString().toStdString();
   const auto message_type = item->data(kNameColumn, Qt::UserRole + 1).toString().toStdString();
+  applyTopicEnabledState(topic_name, message_type, desired_state == Qt::Checked, item);
+  rememberGroupExpansionStates();
+  rebuildTree();
+  updateStatusLabel();
+  Q_EMIT configChanged();
+}
 
-  const bool should_enable = item->checkState(kNameColumn) == Qt::Checked;
+void SensorTreePanel::applyTopicEnabledState(
+  const std::string & topic_name,
+  const std::string & message_type,
+  bool enabled,
+  QTreeWidgetItem * item)
+{
   rememberTopicEnabledState(
-    topic_name, should_enable, &persisted_enabled_topics_, &suppressed_auto_enable_topics_);
+    topic_name, enabled, &persisted_enabled_topics_, &suppressed_auto_enable_topics_);
 
   if (display_registry_.hasDisplay(topic_name)) {
-    display_registry_.setEnabled(topic_name, should_enable);
-    Q_EMIT configChanged();
-    updateStatusLabel();
+    display_registry_.setEnabled(topic_name, enabled);
     return;
   }
 
-  if (!should_enable) {
-    Q_EMIT configChanged();
-    updateStatusLabel();
+  if (!enabled) {
     return;
   }
 
   auto * visualization_manager =
     dynamic_cast<rviz_common::VisualizationManager *>(getDisplayContext());
   if (!visualization_manager) {
-    Q_EMIT configChanged();
-    updateStatusLabel();
     return;
   }
 
@@ -212,16 +235,75 @@ void SensorTreePanel::handleTreeItemChanged(QTreeWidgetItem * item, int column)
 
   if (!display) {
     persisted_enabled_topics_.erase(topic_name);
-    item->setCheckState(kNameColumn, Qt::Unchecked);
-    updateStatusLabel();
+    if (item) {
+      item->setCheckState(kNameColumn, Qt::Unchecked);
+    }
     return;
   }
 
   display_registry_.registerDisplay(
     ManagedDisplay{topic_name, message_type, display_type, display->getName().toStdString(), true},
     display);
-  Q_EMIT configChanged();
-  updateStatusLabel();
+}
+
+void SensorTreePanel::setDescendantTopicsEnabled(QTreeWidgetItem * root_item, bool enabled)
+{
+  if (!root_item) {
+    return;
+  }
+
+  for (int child_index = 0; child_index < root_item->childCount(); ++child_index) {
+    auto * child = root_item->child(child_index);
+    if (!child) {
+      continue;
+    }
+
+    const auto item_type = static_cast<TreeItemType>(
+      child->data(kNameColumn, kTreeItemTypeRole).toInt());
+
+    if (item_type == TreeItemType::Topic) {
+      const auto topic_name = child->data(kNameColumn, Qt::UserRole).toString().toStdString();
+      const auto message_type =
+        child->data(kNameColumn, Qt::UserRole + 1).toString().toStdString();
+      applyTopicEnabledState(topic_name, message_type, enabled, child);
+      continue;
+    }
+
+    setDescendantTopicsEnabled(child, enabled);
+  }
+}
+
+Qt::CheckState SensorTreePanel::determineAggregateCheckState(const QTreeWidgetItem * item) const
+{
+  if (!item || item->childCount() == 0) {
+    return Qt::Unchecked;
+  }
+
+  int checked_children = 0;
+  int unchecked_children = 0;
+  for (int child_index = 0; child_index < item->childCount(); ++child_index) {
+    const auto * child = item->child(child_index);
+    if (!child) {
+      continue;
+    }
+
+    const auto child_state = child->checkState(kNameColumn);
+    if (child_state == Qt::PartiallyChecked) {
+      return Qt::PartiallyChecked;
+    }
+
+    if (child_state == Qt::Checked) {
+      ++checked_children;
+    } else {
+      ++unchecked_children;
+    }
+  }
+
+  if (checked_children > 0 && unchecked_children > 0) {
+    return Qt::PartiallyChecked;
+  }
+
+  return checked_children > 0 ? Qt::Checked : Qt::Unchecked;
 }
 
 void SensorTreePanel::buildUi()
@@ -298,7 +380,7 @@ void SensorTreePanel::rebuildTree()
     auto * category_item = new QTreeWidgetItem(tree_widget_);
     category_item->setText(kNameColumn, QString::fromStdString(toString(category)));
     category_item->setText(kStateColumn, "Category");
-    category_item->setFlags(category_item->flags() & ~Qt::ItemIsUserCheckable);
+    category_item->setFlags(category_item->flags() | Qt::ItemIsUserCheckable);
     category_item->setData(
       kNameColumn, kTreeItemTypeRole, static_cast<int>(TreeItemType::Category));
     category_item->setData(
@@ -314,7 +396,7 @@ void SensorTreePanel::rebuildTree()
     for (const auto & device_group : group->second) {
       auto * group_item = new QTreeWidgetItem(category_item);
       group_item->setText(kNameColumn, QString::fromStdString(device_group.label));
-      group_item->setFlags(group_item->flags() & ~Qt::ItemIsUserCheckable);
+      group_item->setFlags(group_item->flags() | Qt::ItemIsUserCheckable);
       group_item->setData(
         kNameColumn, kTreeItemTypeRole, static_cast<int>(TreeItemType::Group));
       group_item->setData(
@@ -347,6 +429,7 @@ void SensorTreePanel::rebuildTree()
         QString("%1 total / %2 available")
         .arg(static_cast<int>(device_group.topics.size()))
         .arg(available_in_group));
+      group_item->setCheckState(kNameColumn, determineAggregateCheckState(group_item));
       group_item->setExpanded(shouldGroupStartExpanded(device_group.key));
     }
 
@@ -361,6 +444,7 @@ void SensorTreePanel::rebuildTree()
         return total;
       }())
       .arg(available_in_category));
+    category_item->setCheckState(kNameColumn, determineAggregateCheckState(category_item));
     category_item->setExpanded(shouldGroupStartExpanded(toString(category)));
   }
 
