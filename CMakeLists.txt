@@ -10,8 +10,10 @@ set(CMAKE_AUTOMOC ON)
 
 find_package(ament_cmake REQUIRED)
 find_package(pluginlib REQUIRED)
+find_package(geometry_msgs REQUIRED)
 find_package(rclcpp REQUIRED)
 find_package(sensor_msgs REQUIRED)
+find_package(tf2_ros REQUIRED)
 
 if(APPLE AND EXISTS "/opt/homebrew/opt/qt@5")
   list(APPEND CMAKE_PREFIX_PATH "/opt/homebrew/opt/qt@5")
@@ -48,8 +50,10 @@ target_include_directories(${PROJECT_NAME} PUBLIC
 )
 
 ament_target_dependencies(${PROJECT_NAME}
+  geometry_msgs
   rclcpp
   sensor_msgs
+  tf2_ros
 )
 
 target_link_libraries(${PROJECT_NAME}
@@ -70,8 +74,10 @@ target_include_directories(demo_sensor_publisher PUBLIC
 )
 
 ament_target_dependencies(demo_sensor_publisher
+  geometry_msgs
   rclcpp
   sensor_msgs
+  tf2_ros
 )
 
 install(TARGETS ${PROJECT_NAME}
@@ -106,8 +112,10 @@ if(BUILD_TESTING)
       $<INSTALL_INTERFACE:include>
     )
     ament_target_dependencies(sensor_classifier_test
+      geometry_msgs
       rclcpp
       sensor_msgs
+      tf2_ros
     )
   endif()
 
@@ -123,8 +131,10 @@ if(BUILD_TESTING)
       $<INSTALL_INTERFACE:include>
     )
     ament_target_dependencies(sensor_catalog_test
+      geometry_msgs
       rclcpp
       sensor_msgs
+      tf2_ros
     )
   endif()
 
@@ -139,8 +149,10 @@ if(BUILD_TESTING)
       $<INSTALL_INTERFACE:include>
     )
     ament_target_dependencies(display_registry_test
+      geometry_msgs
       rclcpp
       sensor_msgs
+      tf2_ros
     )
     target_link_libraries(display_registry_test
       rviz_common::rviz_common

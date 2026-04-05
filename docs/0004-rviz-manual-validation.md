@@ -68,6 +68,8 @@ If your robot system does not already provide these topics, use your own test no
    In the top menu, choose `Panels -> Add New Panel`
 3. 选择 `rviz_auto_sensor_panel / SensorTreePanel`  
    Select `rviz_auto_sensor_panel / SensorTreePanel`
+4. 将 `Global Options -> Fixed Frame` 设为 `map`  
+   Set `Global Options -> Fixed Frame` to `map`
 
 预期结果：  
 Expected result:

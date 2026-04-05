@@ -5,16 +5,30 @@
 #include <memory>
 #include <string>
 
+#include "geometry_msgs/msg/transform_stamped.hpp"
 #include "rclcpp/rclcpp.hpp"
 #include "sensor_msgs/msg/image.hpp"
 #include "sensor_msgs/msg/laser_scan.hpp"
 #include "sensor_msgs/msg/point_cloud2.hpp"
 #include "sensor_msgs/msg/point_field.hpp"
+#include "tf2_ros/static_transform_broadcaster.h"
 
 namespace rviz_auto_sensor_panel
 {
 
 using namespace std::chrono_literals;
+
+namespace
+{
+
+constexpr char kMapFrame[] = "map";
+constexpr char kFrontLidarFrame[] = "demo_front_lidar_frame";
+constexpr char kRearLidarFrame[] = "demo_rear_lidar_frame";
+constexpr char kLeftCameraFrame[] = "demo_left_camera_frame";
+constexpr char kRightCameraFrame[] = "demo_right_camera_frame";
+constexpr char kPointCloudFrame[] = "demo_point_cloud_frame";
+
+}  // namespace
 
 class DemoSensorPublisher : public rclcpp::Node
 {
@@ -22,6 +36,9 @@ public:
   DemoSensorPublisher()
   : Node("demo_sensor_publisher"), angle_(0.0F)
   {
+    static_tf_broadcaster_ = std::make_unique<tf2_ros::StaticTransformBroadcaster>(this);
+    publishStaticTransforms();
+
     front_scan_publisher_ =
       create_publisher<sensor_msgs::msg::LaserScan>("/demo/front/scan", 10);
     rear_scan_publisher_ =
@@ -44,11 +61,42 @@ public:
   }
 
 private:
-  sensor_msgs::msg::LaserScan buildScan(float phase_offset) const
+  geometry_msgs::msg::TransformStamped buildStaticTransform(
+    const std::string & child_frame,
+    double x,
+    double y,
+    double z) const
+  {
+    geometry_msgs::msg::TransformStamped transform;
+    transform.header.stamp = now();
+    transform.header.frame_id = kMapFrame;
+    transform.child_frame_id = child_frame;
+    transform.transform.translation.x = x;
+    transform.transform.translation.y = y;
+    transform.transform.translation.z = z;
+    transform.transform.rotation.x = 0.0;
+    transform.transform.rotation.y = 0.0;
+    transform.transform.rotation.z = 0.0;
+    transform.transform.rotation.w = 1.0;
+    return transform;
+  }
+
+  void publishStaticTransforms()
+  {
+    std::vector<geometry_msgs::msg::TransformStamped> transforms;
+    transforms.push_back(buildStaticTransform(kFrontLidarFrame, 1.0, 0.0, 0.4));
+    transforms.push_back(buildStaticTransform(kRearLidarFrame, -1.0, 0.0, 0.4));
+    transforms.push_back(buildStaticTransform(kLeftCameraFrame, 0.3, 0.4, 0.8));
+    transforms.push_back(buildStaticTransform(kRightCameraFrame, 0.3, -0.4, 0.8));
+    transforms.push_back(buildStaticTransform(kPointCloudFrame, 0.0, 0.0, 0.6));
+    static_tf_broadcaster_->sendTransform(transforms);
+  }
+
+  sensor_msgs::msg::LaserScan buildScan(float phase_offset, const std::string & frame_id) const
   {
     sensor_msgs::msg::LaserScan scan;
     scan.header.stamp = now();
-    scan.header.frame_id = "map";
+    scan.header.frame_id = frame_id;
     scan.angle_min = -1.57F;
     scan.angle_max = 1.57F;
     scan.angle_increment = 0.05F;
@@ -67,11 +115,15 @@ private:
     return scan;
   }
 
-  sensor_msgs::msg::Image buildImage(int width, int height, int color_offset) const
+  sensor_msgs::msg::Image buildImage(
+    int width,
+    int height,
+    int color_offset,
+    const std::string & frame_id) const
   {
     sensor_msgs::msg::Image image;
     image.header.stamp = now();
-    image.header.frame_id = "map";
+    image.header.frame_id = frame_id;
     image.height = static_cast<uint32_t>(height);
     image.width = static_cast<uint32_t>(width);
     image.encoding = "rgb8";
@@ -96,7 +148,7 @@ private:
   {
     sensor_msgs::msg::PointCloud2 cloud;
     cloud.header.stamp = now();
-    cloud.header.frame_id = "map";
+    cloud.header.frame_id = kPointCloudFrame;
     cloud.height = 1;
     cloud.width = 64;
     cloud.is_bigendian = false;
@@ -137,22 +189,22 @@ private:
 
   void publishFrontScan()
   {
-    front_scan_publisher_->publish(buildScan(0.0F));
+    front_scan_publisher_->publish(buildScan(0.0F, kFrontLidarFrame));
   }
 
   void publishRearScan()
   {
-    rear_scan_publisher_->publish(buildScan(1.4F));
+    rear_scan_publisher_->publish(buildScan(1.4F, kRearLidarFrame));
   }
 
   void publishLeftImage()
   {
-    left_image_publisher_->publish(buildImage(160, 120, 20));
+    left_image_publisher_->publish(buildImage(160, 120, 20, kLeftCameraFrame));
   }
 
   void publishRightImage()
   {
-    right_image_publisher_->publish(buildImage(160, 120, 120));
+    right_image_publisher_->publish(buildImage(160, 120, 120, kRightCameraFrame));
   }
 
   void publishPointCloud()
@@ -162,6 +214,7 @@ private:
 
   float angle_;
   rclcpp::TimerBase::SharedPtr timer_;
+  std::unique_ptr<tf2_ros::StaticTransformBroadcaster> static_tf_broadcaster_;
   rclcpp::Publisher<sensor_msgs::msg::LaserScan>::SharedPtr front_scan_publisher_;
   rclcpp::Publisher<sensor_msgs::msg::LaserScan>::SharedPtr rear_scan_publisher_;
   rclcpp::Publisher<sensor_msgs::msg::Image>::SharedPtr left_image_publisher_;

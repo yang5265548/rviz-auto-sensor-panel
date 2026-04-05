@@ -70,6 +70,9 @@ Expected result:
 - 演示 topics 会自动出现在树里  
   The demo topics should appear automatically in the tree
 
+建议把 `Global Options -> Fixed Frame` 设置为 `map`。  
+It is recommended to set `Global Options -> Fixed Frame` to `map`.
+
 ## 6. 检测插件是否工作 | How to Verify It Works
 
 勾选这些 topics 来验证：  
