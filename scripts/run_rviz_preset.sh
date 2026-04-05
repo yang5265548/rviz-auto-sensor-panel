@@ -12,6 +12,7 @@ if [[ ! -f "${RVIZ_CONFIG}" ]]; then
 fi
 
 mkdir -p "${ROOT_DIR}/.roslog"
+rm -rf "${RVIZ_HOME_DIR}"
 mkdir -p "${RVIZ_HOME_DIR}/.rviz2"
 
 export ROS_LOG_DIR="${ROOT_DIR}/.roslog"
