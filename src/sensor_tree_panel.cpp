@@ -152,16 +152,12 @@ void SensorTreePanel::refreshTopics()
   }
 
   const auto latest_topics = topic_scanner_.scan(node_);
-  if (auto_enable_new_topics_) {
-    for (const auto & topic : latest_topics) {
-      if (
-        known_topics.count(topic.name) == 0 &&
-        suppressed_auto_enable_topics_.count(topic.name) == 0)
-      {
-        persisted_enabled_topics_.insert(topic.name);
-      }
-    }
-  }
+  applyAutoEnableForNewTopics(
+    known_topics,
+    latest_topics,
+    auto_enable_new_topics_,
+    suppressed_auto_enable_topics_,
+    &persisted_enabled_topics_);
 
   sensor_catalog_.update(latest_topics);
   rememberGroupExpansionStates();
@@ -185,13 +181,8 @@ void SensorTreePanel::handleTreeItemChanged(QTreeWidgetItem * item, int column)
   const auto message_type = item->data(kNameColumn, Qt::UserRole + 1).toString().toStdString();
 
   const bool should_enable = item->checkState(kNameColumn) == Qt::Checked;
-  if (should_enable) {
-    persisted_enabled_topics_.insert(topic_name);
-    suppressed_auto_enable_topics_.erase(topic_name);
-  } else {
-    persisted_enabled_topics_.erase(topic_name);
-    suppressed_auto_enable_topics_.insert(topic_name);
-  }
+  rememberTopicEnabledState(
+    topic_name, should_enable, &persisted_enabled_topics_, &suppressed_auto_enable_topics_);
 
   if (display_registry_.hasDisplay(topic_name)) {
     display_registry_.setEnabled(topic_name, should_enable);
@@ -421,18 +412,16 @@ void SensorTreePanel::syncEnabledTopicsFromTree()
 void SensorTreePanel::setAllTopicsEnabled(bool enabled)
 {
   for (const auto & topic : sensor_catalog_.allTopics()) {
-    if (enabled) {
-      persisted_enabled_topics_.insert(topic.name);
-      suppressed_auto_enable_topics_.erase(topic.name);
-    } else {
-      persisted_enabled_topics_.erase(topic.name);
-      suppressed_auto_enable_topics_.insert(topic.name);
-    }
-
     if (display_registry_.hasDisplay(topic.name)) {
       display_registry_.setEnabled(topic.name, enabled);
     }
   }
+
+  setAllTopicStates(
+    sensor_catalog_.allTopics(),
+    enabled,
+    &persisted_enabled_topics_,
+    &suppressed_auto_enable_topics_);
 
   rebuildTree();
   reconcileDesiredDisplays();

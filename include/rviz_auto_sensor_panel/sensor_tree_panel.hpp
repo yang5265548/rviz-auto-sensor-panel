@@ -18,6 +18,7 @@
 #include "rviz_auto_sensor_panel/auto_display_factory.hpp"
 #include "rviz_auto_sensor_panel/display_registry.hpp"
 #include "rviz_auto_sensor_panel/sensor_catalog.hpp"
+#include "rviz_auto_sensor_panel/topic_state_logic.hpp"
 #include "rviz_auto_sensor_panel/topic_scanner.hpp"
 
 namespace rviz_auto_sensor_panel

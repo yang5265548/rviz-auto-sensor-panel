@@ -2,6 +2,7 @@
 
 #include <algorithm>
 #include <cctype>
+#include <functional>
 #include <set>
 #include <sstream>
 #include <vector>
@@ -33,15 +34,44 @@ std::vector<std::string> splitTopicTokens(const std::string & topic_name)
 {
   std::vector<std::string> tokens;
   std::stringstream stream(topic_name);
-  std::string token;
+  std::string path_token;
 
-  while (std::getline(stream, token, '/')) {
-    if (!token.empty()) {
-      tokens.push_back(toLowerCopy(token));
+  while (std::getline(stream, path_token, '/')) {
+    if (path_token.empty()) {
+      continue;
     }
+
+    std::string current_word;
+    auto flush_word = [&tokens, &current_word]() {
+        if (!current_word.empty()) {
+          tokens.push_back(toLowerCopy(current_word));
+          current_word.clear();
+        }
+      };
+
+    for (const char character : path_token) {
+      if (character == '_' || character == '-') {
+        flush_word();
+        continue;
+      }
+
+      current_word.push_back(character);
+    }
+
+    flush_word();
   }
 
   return tokens;
+}
+
+std::string topicLeafLabel(const std::string & topic_name)
+{
+  const auto last_separator = topic_name.find_last_of('/');
+  if (last_separator == std::string::npos) {
+    return topic_name;
+  }
+
+  return topic_name.substr(last_separator + 1);
 }
 
 std::string joinTitleCase(const std::vector<std::string> & tokens)
@@ -194,7 +224,7 @@ TopicProfile buildTopicProfile(const std::string & topic_name, SensorCategory ca
 {
   TopicProfile profile;
   profile.category = category;
-  profile.topic_label = topic_name;
+  profile.topic_label = topicLeafLabel(topic_name);
 
   if (category == SensorCategory::Unknown) {
     profile.group_key = "unknown";

@@ -64,4 +64,17 @@ TEST(SensorClassifierTest, derivesFriendlyGroupLabelsFromCommonTopicConventions)
   EXPECT_EQ(point_cloud.group_label, "Sensors Point Cloud");
 }
 
+TEST(SensorClassifierTest, usesLeafTopicSegmentAsTopicLabel)
+{
+  SensorClassifier classifier;
+
+  const auto image_topic =
+    classifier.classifyTopic("/demo/camera/left/image_raw", "sensor_msgs/msg/Image");
+  EXPECT_EQ(image_topic.topic_label, "image_raw");
+
+  const auto lidar_topic =
+    classifier.classifyTopic("/robot/front_camera/image_raw", "sensor_msgs/msg/Image");
+  EXPECT_EQ(lidar_topic.group_label, "Robot Front Camera");
+}
+
 }  // namespace rviz_auto_sensor_panel

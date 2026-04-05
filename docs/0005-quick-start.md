@@ -76,6 +76,8 @@ Expected result:
   You should see `Lidar`, `Camera`, and `Point Cloud` categories
 - 每个分类下会进一步显示更友好的设备组，例如 `Front Lidar`、`Left Camera`  
   Each category should further show friendlier device groups such as `Front Lidar` and `Left Camera`
+- 设备组下面的 topic 行会优先显示叶子名，例如 `scan`、`image_raw`、`points`  
+  Topic rows under each device group should prefer leaf labels such as `scan`, `image_raw`, and `points`
 - 演示 topics 会自动出现在树里  
   The demo topics should appear automatically in the tree
 

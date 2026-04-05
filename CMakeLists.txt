@@ -30,6 +30,7 @@ set(PUBLIC_HEADERS
   include/rviz_auto_sensor_panel/sensor_catalog.hpp
   include/rviz_auto_sensor_panel/sensor_classifier.hpp
   include/rviz_auto_sensor_panel/sensor_tree_panel.hpp
+  include/rviz_auto_sensor_panel/topic_state_logic.hpp
   include/rviz_auto_sensor_panel/topic_scanner.hpp
   include/rviz_auto_sensor_panel/types.hpp
 )
@@ -41,6 +42,7 @@ add_library(${PROJECT_NAME} SHARED
   src/sensor_catalog.cpp
   src/sensor_classifier.cpp
   src/sensor_tree_panel.cpp
+  src/topic_state_logic.cpp
   src/topic_scanner.cpp
 )
 
@@ -156,6 +158,24 @@ if(BUILD_TESTING)
     )
     target_link_libraries(display_registry_test
       rviz_common::rviz_common
+    )
+  endif()
+
+  ament_add_gtest(topic_state_logic_test
+    test/topic_state_logic_test.cpp
+    src/topic_state_logic.cpp
+  )
+
+  if(TARGET topic_state_logic_test)
+    target_include_directories(topic_state_logic_test PUBLIC
+      $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>
+      $<INSTALL_INTERFACE:include>
+    )
+    ament_target_dependencies(topic_state_logic_test
+      geometry_msgs
+      rclcpp
+      sensor_msgs
+      tf2_ros
     )
   endif()
 endif()
