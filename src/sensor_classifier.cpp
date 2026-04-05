@@ -23,10 +23,20 @@ namespace
 constexpr char kLaserScanMessageType[] = "sensor_msgs/msg/LaserScan";
 constexpr char kImageMessageType[] = "sensor_msgs/msg/Image";
 constexpr char kPointCloud2MessageType[] = "sensor_msgs/msg/PointCloud2";
+constexpr char kOdometryMessageType[] = "nav_msgs/msg/Odometry";
+constexpr char kPathMessageType[] = "nav_msgs/msg/Path";
+constexpr char kPoseArrayMessageType[] = "geometry_msgs/msg/PoseArray";
+constexpr char kMarkerMessageType[] = "visualization_msgs/msg/Marker";
+constexpr char kMarkerArrayMessageType[] = "visualization_msgs/msg/MarkerArray";
 
 constexpr char kLaserScanDisplayType[] = "rviz_default_plugins/LaserScan";
 constexpr char kImageDisplayType[] = "rviz_default_plugins/Image";
 constexpr char kPointCloud2DisplayType[] = "rviz_default_plugins/PointCloud2";
+constexpr char kOdometryDisplayType[] = "rviz_default_plugins/Odometry";
+constexpr char kPathDisplayType[] = "rviz_default_plugins/Path";
+constexpr char kPoseArrayDisplayType[] = "rviz_default_plugins/PoseArray";
+constexpr char kMarkerDisplayType[] = "rviz_default_plugins/Marker";
+constexpr char kMarkerArrayDisplayType[] = "rviz_default_plugins/MarkerArray";
 constexpr char kRulesEnvVar[] = "RVIZ_AUTO_SENSOR_PANEL_RULES_FILE";
 
 std::string sourceTreeRulesPath()
@@ -295,6 +305,10 @@ std::string categoryLabel(SensorCategory category)
       return "Camera";
     case SensorCategory::PointCloud:
       return "Point Cloud";
+    case SensorCategory::Navigation:
+      return "Navigation";
+    case SensorCategory::Visualization:
+      return "Visualization";
     case SensorCategory::Unknown:
     default:
       return "Unknown";
@@ -310,6 +324,10 @@ std::string categoryKey(SensorCategory category)
       return "camera";
     case SensorCategory::PointCloud:
       return "point_cloud";
+    case SensorCategory::Navigation:
+      return "navigation";
+    case SensorCategory::Visualization:
+      return "visualization";
     case SensorCategory::Unknown:
     default:
       return "unknown";
@@ -328,6 +346,10 @@ std::set<std::string> genericSuffixesFor(SensorCategory category)
       };
     case SensorCategory::PointCloud:
       return {"points", "pointcloud", "point_cloud", "velodyne_points", "cloud"};
+    case SensorCategory::Navigation:
+      return {"odom", "odometry", "path", "posearray", "pose_array", "poses", "plan", "trajectory"};
+    case SensorCategory::Visualization:
+      return {"marker", "markers", "markerarray", "marker_array"};
     case SensorCategory::Unknown:
     default:
       return {};
@@ -343,6 +365,32 @@ std::set<std::string> genericTypeWordsFor(SensorCategory category)
       return {"camera", "cam", "image"};
     case SensorCategory::PointCloud:
       return {"pointcloud", "point_cloud", "points", "cloud", "velodyne"};
+    case SensorCategory::Navigation:
+      return {
+        "odom", "odometry", "path", "poses",
+        "posearray", "pose_array", "trajectory", "plan", "route"
+      };
+    case SensorCategory::Visualization:
+      return {"visualization", "viz", "marker", "markers", "markerarray", "marker_array"};
+    case SensorCategory::Unknown:
+    default:
+      return {};
+  }
+}
+
+std::set<std::string> categorySelfWordsFor(SensorCategory category)
+{
+  switch (category) {
+    case SensorCategory::Lidar:
+      return {"lidar", "laser"};
+    case SensorCategory::Camera:
+      return {"camera", "cam"};
+    case SensorCategory::PointCloud:
+      return {"pointcloud", "point_cloud", "cloud", "velodyne"};
+    case SensorCategory::Navigation:
+      return {"navigation", "localization", "planning"};
+    case SensorCategory::Visualization:
+      return {"visualization", "viz"};
     case SensorCategory::Unknown:
     default:
       return {};
@@ -430,6 +478,7 @@ TopicProfile buildTopicProfile(
 
   const auto category_name = categoryLabel(category);
   const auto category_key_name = categoryKey(category);
+  const auto self_words = categorySelfWordsFor(category);
 
   if (label_tokens.empty()) {
     profile.group_label = category_name;
@@ -437,7 +486,12 @@ TopicProfile buildTopicProfile(
     return profile;
   }
 
-  profile.group_label = joinTitleCase(label_tokens) + " " + category_name;
+  const auto last_token = label_tokens.back();
+  if (contains(self_words, last_token)) {
+    profile.group_label = joinTitleCase(label_tokens);
+  } else {
+    profile.group_label = joinTitleCase(label_tokens) + " " + category_name;
+  }
   profile.group_key = category_key_name + ":" + joinSnakeCase(key_tokens);
   return profile;
 }
@@ -461,6 +515,21 @@ SensorCategory SensorClassifier::classifyMessageType(const std::string & message
 
   if (message_type == kPointCloud2MessageType) {
     return SensorCategory::PointCloud;
+  }
+
+  if (
+    message_type == kOdometryMessageType ||
+    message_type == kPathMessageType ||
+    message_type == kPoseArrayMessageType)
+  {
+    return SensorCategory::Navigation;
+  }
+
+  if (
+    message_type == kMarkerMessageType ||
+    message_type == kMarkerArrayMessageType)
+  {
+    return SensorCategory::Visualization;
   }
 
   return SensorCategory::Unknown;
@@ -492,6 +561,26 @@ std::string SensorClassifier::lookupDisplayType(const std::string & message_type
     return kPointCloud2DisplayType;
   }
 
+  if (message_type == kOdometryMessageType) {
+    return kOdometryDisplayType;
+  }
+
+  if (message_type == kPathMessageType) {
+    return kPathDisplayType;
+  }
+
+  if (message_type == kPoseArrayMessageType) {
+    return kPoseArrayDisplayType;
+  }
+
+  if (message_type == kMarkerMessageType) {
+    return kMarkerDisplayType;
+  }
+
+  if (message_type == kMarkerArrayMessageType) {
+    return kMarkerArrayDisplayType;
+  }
+
   return "";
 }
 
@@ -510,7 +599,9 @@ std::vector<SensorCategory> supportedCategories()
   return {
     SensorCategory::Lidar,
     SensorCategory::Camera,
-    SensorCategory::PointCloud
+    SensorCategory::PointCloud,
+    SensorCategory::Navigation,
+    SensorCategory::Visualization
   };
 }
 

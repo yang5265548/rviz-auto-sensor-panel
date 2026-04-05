@@ -91,8 +91,8 @@ Expected result:
 预期结果：  
 Expected result:
 
-- 面板中出现 `Lidar`、`Camera`、`Point Cloud` 分类  
-  The panel shows `Lidar`, `Camera`, and `Point Cloud` categories
+- 面板中出现 `Lidar`、`Camera`、`Point Cloud`、`Navigation`、`Visualization` 分类  
+  The panel shows `Lidar`, `Camera`, `Point Cloud`, `Navigation`, and `Visualization` categories
 - 对应 topic 出现在分类下  
   Matching topics appear under those categories
 - `State` 列会显示每个 topic 的 publisher 数量  
@@ -106,8 +106,8 @@ Expected result:
    Check a `LaserScan` topic in the tree
 2. 在 RViz 左侧 Displays 区域查看是否新增自动 display  
    Check the RViz Displays area for a new auto-created display
-3. 对 `Image` 与 `PointCloud2` 重复相同步骤  
-   Repeat for `Image` and `PointCloud2`
+3. 对 `Image`、`PointCloud2`、`Odometry`、`Path` 或 `MarkerArray` 重复相同步骤  
+   Repeat for `Image`, `PointCloud2`, `Odometry`, `Path`, or `MarkerArray`
 
 预期结果：  
 Expected result:

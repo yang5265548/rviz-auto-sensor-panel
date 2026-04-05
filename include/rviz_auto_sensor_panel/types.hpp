@@ -12,7 +12,9 @@ enum class SensorCategory
   Unknown,
   Lidar,
   Camera,
-  PointCloud
+  PointCloud,
+  Navigation,
+  Visualization
 };
 
 struct DiscoveredTopic

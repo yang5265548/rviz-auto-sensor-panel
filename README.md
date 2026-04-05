@@ -5,8 +5,8 @@
 面向 ROS 2 的自动化 RViz 插件。  
 An automation-oriented RViz plugin for ROS 2.
 
-这个项目希望减少 RViz 中重复、机械的配置步骤：自动发现受支持的传感器 topic，在树形面板中组织展示，并按需创建匹配的 RViz display。  
-This project aims to reduce repetitive RViz setup by automatically discovering supported sensor topics, organizing them in a tree panel, and creating matching RViz displays on demand.
+这个项目希望减少 RViz 中重复、机械的配置步骤：自动发现受支持的 ROS 2 可视化 topic，在树形面板中组织展示，并按需创建匹配的 RViz display。  
+This project aims to reduce repetitive RViz setup by automatically discovering supported ROS 2 visualization topics, organizing them in a tree panel, and creating matching RViz displays on demand.
 
 ## 愿景 | Vision
 
@@ -34,12 +34,17 @@ The first version focuses on:
 - 自动创建匹配的 RViz displays  
   Automatic creation of matching RViz displays
 
-初始支持的消息类型：  
-Initial supported message types:
+当前支持的消息类型：  
+Currently supported message types:
 
 - `sensor_msgs/msg/LaserScan`
 - `sensor_msgs/msg/Image`
 - `sensor_msgs/msg/PointCloud2`
+- `nav_msgs/msg/Odometry`
+- `nav_msgs/msg/Path`
+- `geometry_msgs/msg/PoseArray`
+- `visualization_msgs/msg/Marker`
+- `visualization_msgs/msg/MarkerArray`
 
 ## 项目状态 | Project Status
 
@@ -85,10 +90,12 @@ Repository-level files:
 
 ## 当前已具备 | What Works Today
 
-- 自动发现 `LaserScan`、`Image`、`PointCloud2`  
-  Automatically discovers `LaserScan`, `Image`, and `PointCloud2`
+- 自动发现 `LaserScan`、`Image`、`PointCloud2`、`Odometry`、`Path`、`PoseArray`、`Marker`、`MarkerArray`  
+  Automatically discovers `LaserScan`, `Image`, `PointCloud2`, `Odometry`, `Path`, `PoseArray`, `Marker`, and `MarkerArray`
 - 设备树分组与更友好的设备命名  
   Groups topics into a device tree with friendlier labels
+- 覆盖传感器、导航和调试可视化三个使用场景  
+  Covers sensor, navigation, and debug-visualization use cases
 - 勾选后自动创建对应 RViz display  
   Automatically creates matching RViz displays when checked
 - `Enable All` / `Disable All` / `Auto-enable new topics`  
@@ -102,11 +109,9 @@ Repository-level files:
 
 ## 下一步 | Next Steps
 
-- 增加更多传感器类型支持  
-  Add support for more sensor message types
 - 引入更细粒度的设备模板与项目级规则  
   Introduce richer device templates and project-level rules
 - 补更多 RViz 行为回归测试  
   Add more RViz behavior regression coverage
-- 继续减少首次使用时的手工步骤  
-  Continue reducing manual steps during first-time setup
+- 增加更丰富的面板信息与配置 UI  
+  Add richer panel metadata and configuration UI

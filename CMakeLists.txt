@@ -10,11 +10,13 @@ set(CMAKE_AUTOMOC ON)
 
 find_package(ament_cmake REQUIRED)
 find_package(ament_index_cpp REQUIRED)
-find_package(pluginlib REQUIRED)
 find_package(geometry_msgs REQUIRED)
+find_package(nav_msgs REQUIRED)
+find_package(pluginlib REQUIRED)
 find_package(rclcpp REQUIRED)
 find_package(sensor_msgs REQUIRED)
 find_package(tf2_ros REQUIRED)
+find_package(visualization_msgs REQUIRED)
 
 if(APPLE AND EXISTS "/opt/homebrew/opt/qt@5")
   list(APPEND CMAKE_PREFIX_PATH "/opt/homebrew/opt/qt@5")
@@ -59,9 +61,11 @@ target_include_directories(${PROJECT_NAME} PUBLIC
 ament_target_dependencies(${PROJECT_NAME}
   ament_index_cpp
   geometry_msgs
+  nav_msgs
   rclcpp
   sensor_msgs
   tf2_ros
+  visualization_msgs
 )
 
 target_link_libraries(${PROJECT_NAME}
@@ -83,9 +87,11 @@ target_include_directories(demo_sensor_publisher PUBLIC
 
 ament_target_dependencies(demo_sensor_publisher
   geometry_msgs
+  nav_msgs
   rclcpp
   sensor_msgs
   tf2_ros
+  visualization_msgs
 )
 
 install(TARGETS ${PROJECT_NAME}
@@ -126,9 +132,11 @@ if(BUILD_TESTING)
     ament_target_dependencies(sensor_classifier_test
       ament_index_cpp
       geometry_msgs
+      nav_msgs
       rclcpp
       sensor_msgs
       tf2_ros
+      visualization_msgs
     )
     target_compile_definitions(sensor_classifier_test PRIVATE
       RVIZ_AUTO_SENSOR_PANEL_SOURCE_DIR="${CMAKE_CURRENT_SOURCE_DIR}"
@@ -149,9 +157,11 @@ if(BUILD_TESTING)
     ament_target_dependencies(sensor_catalog_test
       ament_index_cpp
       geometry_msgs
+      nav_msgs
       rclcpp
       sensor_msgs
       tf2_ros
+      visualization_msgs
     )
     target_compile_definitions(sensor_catalog_test PRIVATE
       RVIZ_AUTO_SENSOR_PANEL_SOURCE_DIR="${CMAKE_CURRENT_SOURCE_DIR}"
@@ -171,9 +181,11 @@ if(BUILD_TESTING)
     ament_target_dependencies(display_registry_test
       ament_index_cpp
       geometry_msgs
+      nav_msgs
       rclcpp
       sensor_msgs
       tf2_ros
+      visualization_msgs
     )
     target_link_libraries(display_registry_test
       rviz_common::rviz_common
@@ -193,9 +205,11 @@ if(BUILD_TESTING)
     ament_target_dependencies(topic_state_logic_test
       ament_index_cpp
       geometry_msgs
+      nav_msgs
       rclcpp
       sensor_msgs
       tf2_ros
+      visualization_msgs
     )
   endif()
 endif()

@@ -41,6 +41,10 @@ This process continuously publishes these demo topics:
 - `/demo/camera/left/image_raw`
 - `/demo/camera/right/image_raw`
 - `/demo/lidar/points`
+- `/demo/localization/odom`
+- `/demo/localization/pose_array`
+- `/demo/navigation/path`
+- `/demo/debug/markers`
 
 如果你想先确认数据已经起来，可以在第三个终端执行：  
 If you want to confirm the data is up first, run this in a third terminal:
@@ -99,8 +103,8 @@ If you started through `./scripts/run_rviz_local.sh`, then inside RViz:
 预期结果：  
 Expected result:
 
-- 你会看到 `Lidar`、`Camera`、`Point Cloud` 三个分类  
-  You should see `Lidar`, `Camera`, and `Point Cloud` categories
+- 你会看到 `Lidar`、`Camera`、`Point Cloud`、`Navigation`、`Visualization` 五个分类  
+  You should see `Lidar`, `Camera`, `Point Cloud`, `Navigation`, and `Visualization` categories
 - 每个分类下会进一步显示更友好的设备组，例如 `Front Lidar`、`Left Camera`  
   Each category should further show friendlier device groups such as `Front Lidar` and `Left Camera`
 - 设备组下面的 topic 行会优先显示叶子名，例如 `scan`、`image_raw`、`points`  
@@ -119,14 +123,17 @@ Check these topics to validate behavior:
 - `/demo/front/scan`
 - `/demo/camera/left/image_raw`
 - `/demo/lidar/points`
+- `/demo/localization/odom`
+- `/demo/navigation/path`
+- `/demo/debug/markers`
 
 预期结果：  
 Expected result:
 
 - RViz 左侧 Displays 区域会自动增加 `[Auto]` 开头的 display  
   RViz Displays should automatically gain displays prefixed with `[Auto]`
-- 不需要手动 `Add` `LaserScan`、`Image`、`PointCloud2`  
-  You do not need to manually add `LaserScan`, `Image`, or `PointCloud2`
+- 不需要手动 `Add` `LaserScan`、`Image`、`PointCloud2`、`Odometry`、`Path` 或 `MarkerArray`  
+  You do not need to manually add `LaserScan`, `Image`, `PointCloud2`, `Odometry`, `Path`, or `MarkerArray`
 - 取消勾选时，该 display 会被禁用  
   Unchecking disables the display
 - 面板 `State` 列会显示 publisher 数量；离线保留的 topic 会显示 `Offline`  

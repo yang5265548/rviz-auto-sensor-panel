@@ -1,5 +1,11 @@
 # Changelog
 
+## Unreleased
+
+- Added automatic support for `Odometry`, `Path`, `PoseArray`, `Marker`, and `MarkerArray`
+- Expanded the demo publisher to cover navigation and debug-visualization topics
+- Updated the quick-start docs to reflect broader RViz auto-display coverage
+
 ## 0.1.0
 
 Initial working MVP:

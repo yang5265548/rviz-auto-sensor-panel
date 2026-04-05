@@ -18,6 +18,21 @@ TEST(SensorClassifierTest, classifiesSupportedTypes)
   EXPECT_EQ(
     classifier.classifyMessageType("sensor_msgs/msg/PointCloud2"),
     SensorCategory::PointCloud);
+  EXPECT_EQ(
+    classifier.classifyMessageType("nav_msgs/msg/Odometry"),
+    SensorCategory::Navigation);
+  EXPECT_EQ(
+    classifier.classifyMessageType("nav_msgs/msg/Path"),
+    SensorCategory::Navigation);
+  EXPECT_EQ(
+    classifier.classifyMessageType("geometry_msgs/msg/PoseArray"),
+    SensorCategory::Navigation);
+  EXPECT_EQ(
+    classifier.classifyMessageType("visualization_msgs/msg/Marker"),
+    SensorCategory::Visualization);
+  EXPECT_EQ(
+    classifier.classifyMessageType("visualization_msgs/msg/MarkerArray"),
+    SensorCategory::Visualization);
 }
 
 TEST(SensorClassifierTest, rejectsUnsupportedTypes)
@@ -42,6 +57,21 @@ TEST(SensorClassifierTest, mapsToRvizDefaultPluginTypes)
   EXPECT_EQ(
     classifier.lookupDisplayType("sensor_msgs/msg/PointCloud2"),
     "rviz_default_plugins/PointCloud2");
+  EXPECT_EQ(
+    classifier.lookupDisplayType("nav_msgs/msg/Odometry"),
+    "rviz_default_plugins/Odometry");
+  EXPECT_EQ(
+    classifier.lookupDisplayType("nav_msgs/msg/Path"),
+    "rviz_default_plugins/Path");
+  EXPECT_EQ(
+    classifier.lookupDisplayType("geometry_msgs/msg/PoseArray"),
+    "rviz_default_plugins/PoseArray");
+  EXPECT_EQ(
+    classifier.lookupDisplayType("visualization_msgs/msg/Marker"),
+    "rviz_default_plugins/Marker");
+  EXPECT_EQ(
+    classifier.lookupDisplayType("visualization_msgs/msg/MarkerArray"),
+    "rviz_default_plugins/MarkerArray");
 }
 
 TEST(SensorClassifierTest, derivesFriendlyGroupLabelsFromCommonTopicConventions)
@@ -62,6 +92,16 @@ TEST(SensorClassifierTest, derivesFriendlyGroupLabelsFromCommonTopicConventions)
     classifier.classifyTopic("/sensors/velodyne_points", "sensor_msgs/msg/PointCloud2");
   EXPECT_EQ(point_cloud.category, SensorCategory::PointCloud);
   EXPECT_EQ(point_cloud.group_label, "Sensors Point Cloud");
+
+  const auto localization =
+    classifier.classifyTopic("/demo/localization/odom", "nav_msgs/msg/Odometry");
+  EXPECT_EQ(localization.category, SensorCategory::Navigation);
+  EXPECT_EQ(localization.group_label, "Localization");
+
+  const auto debug_markers =
+    classifier.classifyTopic("/demo/debug/markers", "visualization_msgs/msg/MarkerArray");
+  EXPECT_EQ(debug_markers.category, SensorCategory::Visualization);
+  EXPECT_EQ(debug_markers.group_label, "Debug Visualization");
 }
 
 TEST(SensorClassifierTest, usesLeafTopicSegmentAsTopicLabel)

@@ -4,14 +4,21 @@
 #include <cstring>
 #include <memory>
 #include <string>
+#include <vector>
 
+#include "geometry_msgs/msg/pose_array.hpp"
+#include "geometry_msgs/msg/pose_stamped.hpp"
 #include "geometry_msgs/msg/transform_stamped.hpp"
+#include "nav_msgs/msg/odometry.hpp"
+#include "nav_msgs/msg/path.hpp"
 #include "rclcpp/rclcpp.hpp"
 #include "sensor_msgs/msg/image.hpp"
 #include "sensor_msgs/msg/laser_scan.hpp"
 #include "sensor_msgs/msg/point_cloud2.hpp"
 #include "sensor_msgs/msg/point_field.hpp"
 #include "tf2_ros/static_transform_broadcaster.h"
+#include "visualization_msgs/msg/marker.hpp"
+#include "visualization_msgs/msg/marker_array.hpp"
 
 namespace rviz_auto_sensor_panel
 {
@@ -27,6 +34,7 @@ constexpr char kRearLidarFrame[] = "demo_rear_lidar_frame";
 constexpr char kLeftCameraFrame[] = "demo_left_camera_frame";
 constexpr char kRightCameraFrame[] = "demo_right_camera_frame";
 constexpr char kPointCloudFrame[] = "demo_point_cloud_frame";
+constexpr char kBaseFrame[] = "demo_base_link";
 
 }  // namespace
 
@@ -49,6 +57,14 @@ public:
       create_publisher<sensor_msgs::msg::Image>("/demo/camera/right/image_raw", 10);
     point_cloud_publisher_ =
       create_publisher<sensor_msgs::msg::PointCloud2>("/demo/lidar/points", 10);
+    odometry_publisher_ =
+      create_publisher<nav_msgs::msg::Odometry>("/demo/localization/odom", 10);
+    path_publisher_ =
+      create_publisher<nav_msgs::msg::Path>("/demo/navigation/path", 10);
+    pose_array_publisher_ =
+      create_publisher<geometry_msgs::msg::PoseArray>("/demo/localization/pose_array", 10);
+    marker_array_publisher_ =
+      create_publisher<visualization_msgs::msg::MarkerArray>("/demo/debug/markers", 10);
 
     timer_ = create_wall_timer(200ms, [this]() {
       publishFrontScan();
@@ -56,6 +72,10 @@ public:
       publishLeftImage();
       publishRightImage();
       publishPointCloud();
+      publishOdometry();
+      publishPath();
+      publishPoseArray();
+      publishMarkerArray();
       angle_ += 0.15F;
     });
   }
@@ -89,7 +109,21 @@ private:
     transforms.push_back(buildStaticTransform(kLeftCameraFrame, 0.3, 0.4, 0.8));
     transforms.push_back(buildStaticTransform(kRightCameraFrame, 0.3, -0.4, 0.8));
     transforms.push_back(buildStaticTransform(kPointCloudFrame, 0.0, 0.0, 0.6));
+    transforms.push_back(buildStaticTransform(kBaseFrame, 0.0, 0.0, 0.0));
     static_tf_broadcaster_->sendTransform(transforms);
+  }
+
+  geometry_msgs::msg::Pose currentPose(double radius_scale = 1.0) const
+  {
+    geometry_msgs::msg::Pose pose;
+    pose.position.x = radius_scale * std::cos(angle_ * 0.35F) * 2.0;
+    pose.position.y = radius_scale * std::sin(angle_ * 0.35F) * 1.2;
+    pose.position.z = 0.0;
+    pose.orientation.x = 0.0;
+    pose.orientation.y = 0.0;
+    pose.orientation.z = std::sin(angle_ * 0.175F);
+    pose.orientation.w = std::cos(angle_ * 0.175F);
+    return pose;
   }
 
   sensor_msgs::msg::LaserScan buildScan(float phase_offset, const std::string & frame_id) const
@@ -212,14 +246,99 @@ private:
     point_cloud_publisher_->publish(buildPointCloud());
   }
 
+  void publishOdometry()
+  {
+    nav_msgs::msg::Odometry odometry;
+    odometry.header.stamp = now();
+    odometry.header.frame_id = kMapFrame;
+    odometry.child_frame_id = kBaseFrame;
+    odometry.pose.pose = currentPose();
+    odometry.twist.twist.linear.x = std::cos(angle_ * 0.35F);
+    odometry.twist.twist.linear.y = std::sin(angle_ * 0.35F);
+    odometry.twist.twist.angular.z = 0.35;
+    odometry_publisher_->publish(odometry);
+  }
+
+  void publishPath()
+  {
+    geometry_msgs::msg::PoseStamped pose_stamped;
+    pose_stamped.header.stamp = now();
+    pose_stamped.header.frame_id = kMapFrame;
+    pose_stamped.pose = currentPose();
+
+    path_history_.push_back(pose_stamped);
+    constexpr std::size_t kMaxPathSamples = 80;
+    if (path_history_.size() > kMaxPathSamples) {
+      path_history_.erase(path_history_.begin());
+    }
+
+    nav_msgs::msg::Path path;
+    path.header = pose_stamped.header;
+    path.poses = path_history_;
+    path_publisher_->publish(path);
+  }
+
+  void publishPoseArray()
+  {
+    geometry_msgs::msg::PoseArray pose_array;
+    pose_array.header.stamp = now();
+    pose_array.header.frame_id = kMapFrame;
+
+    for (int index = 0; index < 12; ++index) {
+      const float phase = angle_ + static_cast<float>(index) * 0.45F;
+      geometry_msgs::msg::Pose pose;
+      pose.position.x = 1.5 * std::cos(phase);
+      pose.position.y = 1.5 * std::sin(phase);
+      pose.position.z = 0.0;
+      pose.orientation.w = 1.0;
+      pose_array.poses.push_back(pose);
+    }
+
+    pose_array_publisher_->publish(pose_array);
+  }
+
+  void publishMarkerArray()
+  {
+    visualization_msgs::msg::MarkerArray marker_array;
+
+    for (int index = 0; index < 3; ++index) {
+      visualization_msgs::msg::Marker marker;
+      marker.header.stamp = now();
+      marker.header.frame_id = kMapFrame;
+      marker.ns = "demo_markers";
+      marker.id = index;
+      marker.type = visualization_msgs::msg::Marker::SPHERE;
+      marker.action = visualization_msgs::msg::Marker::ADD;
+      marker.scale.x = 0.25;
+      marker.scale.y = 0.25;
+      marker.scale.z = 0.25;
+      marker.pose.orientation.w = 1.0;
+      marker.pose.position.x = 2.5 * std::cos(angle_ + static_cast<float>(index) * 1.7F);
+      marker.pose.position.y = 2.5 * std::sin(angle_ + static_cast<float>(index) * 1.7F);
+      marker.pose.position.z = 0.5 + 0.2 * index;
+      marker.color.a = 1.0F;
+      marker.color.r = index == 0 ? 1.0F : 0.2F;
+      marker.color.g = index == 1 ? 1.0F : 0.4F;
+      marker.color.b = index == 2 ? 1.0F : 0.6F;
+      marker_array.markers.push_back(marker);
+    }
+
+    marker_array_publisher_->publish(marker_array);
+  }
+
   float angle_;
   rclcpp::TimerBase::SharedPtr timer_;
   std::unique_ptr<tf2_ros::StaticTransformBroadcaster> static_tf_broadcaster_;
+  std::vector<geometry_msgs::msg::PoseStamped> path_history_;
   rclcpp::Publisher<sensor_msgs::msg::LaserScan>::SharedPtr front_scan_publisher_;
   rclcpp::Publisher<sensor_msgs::msg::LaserScan>::SharedPtr rear_scan_publisher_;
   rclcpp::Publisher<sensor_msgs::msg::Image>::SharedPtr left_image_publisher_;
   rclcpp::Publisher<sensor_msgs::msg::Image>::SharedPtr right_image_publisher_;
   rclcpp::Publisher<sensor_msgs::msg::PointCloud2>::SharedPtr point_cloud_publisher_;
+  rclcpp::Publisher<nav_msgs::msg::Odometry>::SharedPtr odometry_publisher_;
+  rclcpp::Publisher<nav_msgs::msg::Path>::SharedPtr path_publisher_;
+  rclcpp::Publisher<geometry_msgs::msg::PoseArray>::SharedPtr pose_array_publisher_;
+  rclcpp::Publisher<visualization_msgs::msg::MarkerArray>::SharedPtr marker_array_publisher_;
 };
 
 }  // namespace rviz_auto_sensor_panel

@@ -91,8 +91,8 @@ It starts the demo publisher and then opens RViz with the default preset.
 After launch, you should directly see:
 
 - `SensorTreePanel`
-- `Lidar`、`Camera`、`Point Cloud` 分类  
-  `Lidar`, `Camera`, and `Point Cloud` categories
+- `Lidar`、`Camera`、`Point Cloud`、`Navigation`、`Visualization` 分类  
+  `Lidar`, `Camera`, `Point Cloud`, `Navigation`, and `Visualization` categories
 - `Fixed Frame = map`
 
 接下来只需要：  
