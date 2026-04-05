@@ -44,4 +44,24 @@ TEST(SensorClassifierTest, mapsToRvizDefaultPluginTypes)
     "rviz_default_plugins/PointCloud2");
 }
 
+TEST(SensorClassifierTest, derivesFriendlyGroupLabelsFromCommonTopicConventions)
+{
+  SensorClassifier classifier;
+
+  const auto front_lidar =
+    classifier.classifyTopic("/robot/front/lidar/scan", "sensor_msgs/msg/LaserScan");
+  EXPECT_EQ(front_lidar.category, SensorCategory::Lidar);
+  EXPECT_EQ(front_lidar.group_label, "Robot Front Lidar");
+
+  const auto left_camera =
+    classifier.classifyTopic("/camera/left/image_raw", "sensor_msgs/msg/Image");
+  EXPECT_EQ(left_camera.category, SensorCategory::Camera);
+  EXPECT_EQ(left_camera.group_label, "Left Camera");
+
+  const auto point_cloud =
+    classifier.classifyTopic("/sensors/velodyne_points", "sensor_msgs/msg/PointCloud2");
+  EXPECT_EQ(point_cloud.category, SensorCategory::PointCloud);
+  EXPECT_EQ(point_cloud.group_label, "Sensors Point Cloud");
+}
+
 }  // namespace rviz_auto_sensor_panel

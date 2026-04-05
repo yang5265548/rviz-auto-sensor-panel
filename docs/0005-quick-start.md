@@ -74,6 +74,8 @@ Expected result:
 
 - 你会看到 `Lidar`、`Camera`、`Point Cloud` 三个分类  
   You should see `Lidar`, `Camera`, and `Point Cloud` categories
+- 每个分类下会进一步显示更友好的设备组，例如 `Front Lidar`、`Left Camera`  
+  Each category should further show friendlier device groups such as `Front Lidar` and `Left Camera`
 - 演示 topics 会自动出现在树里  
   The demo topics should appear automatically in the tree
 
@@ -108,6 +110,8 @@ The panel now also supports these lower-effort interactions:
   `Enable All`: enable all discovered topics at once
 - `Disable All`：一次关闭所有已发现 topic  
   `Disable All`: disable all discovered topics at once
+- 用户手动关闭过的 topic 会被记住，不会因为后续刷新立即自动打开  
+  Topics manually turned off by the user are remembered and should not immediately auto-enable again on refresh
 
 ## 7. 如果面板没出现 | If the Panel Does Not Appear
 

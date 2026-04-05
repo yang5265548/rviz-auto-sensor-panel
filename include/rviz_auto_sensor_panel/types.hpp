@@ -21,6 +21,17 @@ struct DiscoveredTopic
   std::string message_type;
   SensorCategory category{SensorCategory::Unknown};
   bool is_available{true};
+  std::string group_key;
+  std::string group_label;
+  std::string topic_label;
+};
+
+struct TopicGroup
+{
+  std::string key;
+  std::string label;
+  SensorCategory category{SensorCategory::Unknown};
+  std::vector<DiscoveredTopic> topics;
 };
 
 struct ManagedDisplay

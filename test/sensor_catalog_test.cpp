@@ -46,8 +46,42 @@ TEST(SensorCatalogTest, groupsTopicsByCategory)
   const auto groups = catalog.groupedTopics();
 
   ASSERT_EQ(groups.at(SensorCategory::Lidar).size(), 2u);
+  ASSERT_EQ(groups.at(SensorCategory::Lidar)[0].topics.size(), 1u);
+  ASSERT_EQ(groups.at(SensorCategory::Lidar)[1].topics.size(), 1u);
   ASSERT_EQ(groups.at(SensorCategory::Camera).size(), 1u);
+  ASSERT_EQ(groups.at(SensorCategory::Camera)[0].topics.size(), 1u);
   ASSERT_EQ(groups.at(SensorCategory::PointCloud).size(), 0u);
+}
+
+TEST(SensorCatalogTest, mergesTopicsIntoStableDeviceGroups)
+{
+  SensorCatalog catalog;
+
+  catalog.update({
+    DiscoveredTopic{
+      "/robot/front/lidar/scan",
+      "sensor_msgs/msg/LaserScan",
+      SensorCategory::Lidar,
+      true,
+      "lidar:robot_front",
+      "Robot Front Lidar",
+      "/robot/front/lidar/scan"
+    },
+    DiscoveredTopic{
+      "/robot/front/lidar/scan_filtered",
+      "sensor_msgs/msg/LaserScan",
+      SensorCategory::Lidar,
+      true,
+      "lidar:robot_front",
+      "Robot Front Lidar",
+      "/robot/front/lidar/scan_filtered"
+    }
+  });
+
+  const auto groups = catalog.groupedTopics();
+  ASSERT_EQ(groups.at(SensorCategory::Lidar).size(), 1u);
+  EXPECT_EQ(groups.at(SensorCategory::Lidar)[0].label, "Robot Front Lidar");
+  EXPECT_EQ(groups.at(SensorCategory::Lidar)[0].topics.size(), 2u);
 }
 
 }  // namespace rviz_auto_sensor_panel

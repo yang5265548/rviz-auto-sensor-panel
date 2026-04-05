@@ -43,8 +43,8 @@ Initial supported message types:
 
 ## 项目状态 | Project Status
 
-项目目前处于规划与架构设计阶段。  
-The project is currently in the planning, architecture, and scaffolding phase.
+项目目前处于“可运行 MVP 原型”阶段。  
+The project is currently at the "working MVP prototype" stage.
 
 需求基线文档：  
 Requirements baseline:
@@ -54,6 +54,7 @@ Requirements baseline:
 - [Development Setup / 开发环境](./docs/0003-development-setup.md)
 - [RViz Manual Validation / 手工验证](./docs/0004-rviz-manual-validation.md)
 - [Quick Start / 快速启动](./docs/0005-quick-start.md)
+- [Topic Grouping Rules / Topic 分组规则](./docs/0006-topic-grouping-rules.md)
 
 ## 计划目录 | Planned Structure
 

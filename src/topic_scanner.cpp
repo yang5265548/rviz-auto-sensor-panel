@@ -25,11 +25,15 @@ std::vector<DiscoveredTopic> TopicScanner::scan(const rclcpp::Node::SharedPtr & 
         continue;
       }
 
+      const auto topic_profile = classifier_.classifyTopic(topic_name, message_type);
       topics.push_back(DiscoveredTopic{
         topic_name,
         message_type,
-        classifier_.classifyMessageType(message_type),
-        true
+        topic_profile.category,
+        true,
+        topic_profile.group_key,
+        topic_profile.group_label,
+        topic_profile.topic_label
       });
     }
   }

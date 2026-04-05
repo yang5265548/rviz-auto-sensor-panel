@@ -51,8 +51,8 @@ private:
   void reconcileDesiredDisplays();
   void setAllTopicsEnabled(bool enabled);
   bool shouldTopicStartEnabled(const std::string & topic_name) const;
-  bool shouldCategoryStartExpanded(SensorCategory category) const;
-  void rememberCategoryExpansionStates();
+  bool shouldGroupStartExpanded(const std::string & group_key) const;
+  void rememberGroupExpansionStates();
 
   QLabel * status_label_;
   QPushButton * refresh_button_;
@@ -70,7 +70,8 @@ private:
   DisplayRegistry display_registry_;
   AutoDisplayFactory auto_display_factory_;
   std::set<std::string> persisted_enabled_topics_;
-  std::map<std::string, bool> persisted_category_expansion_;
+  std::set<std::string> suppressed_auto_enable_topics_;
+  std::map<std::string, bool> persisted_group_expansion_;
   bool auto_enable_new_topics_;
 };
 

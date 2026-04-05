@@ -15,7 +15,7 @@ class SensorCatalog
 public:
   void update(const std::vector<DiscoveredTopic> & latest_topics);
   std::vector<DiscoveredTopic> allTopics() const;
-  std::map<SensorCategory, std::vector<DiscoveredTopic>> groupedTopics() const;
+  std::map<SensorCategory, std::vector<TopicGroup>> groupedTopics() const;
 
 private:
   std::map<std::string, DiscoveredTopic> topics_by_name_;

@@ -22,11 +22,21 @@ constexpr int kTreeColumnCount = 2;
 constexpr int kNameColumn = 0;
 constexpr int kStateColumn = 1;
 constexpr char kEnabledTopicsKey[] = "EnabledTopics";
-constexpr char kExpandedCategoriesKey[] = "ExpandedCategories";
+constexpr char kSuppressedTopicsKey[] = "SuppressedTopics";
+constexpr char kExpandedGroupsKey[] = "ExpandedGroups";
 constexpr char kTopicNameKey[] = "TopicName";
-constexpr char kCategoryNameKey[] = "CategoryName";
+constexpr char kGroupKey[] = "GroupKey";
 constexpr char kExpandedKey[] = "Expanded";
 constexpr char kAutoEnableNewTopicsKey[] = "AutoEnableNewTopics";
+constexpr int kTreeItemTypeRole = Qt::UserRole + 10;
+constexpr int kTreeItemGroupKeyRole = Qt::UserRole + 11;
+
+enum class TreeItemType
+{
+  Category,
+  Group,
+  Topic
+};
 
 }  // namespace
 
@@ -66,7 +76,8 @@ void SensorTreePanel::load(const rviz_common::Config & config)
   rviz_common::Panel::load(config);
 
   persisted_enabled_topics_.clear();
-  persisted_category_expansion_.clear();
+  suppressed_auto_enable_topics_.clear();
+  persisted_group_expansion_.clear();
 
   const auto enabled_topics = config.mapGetChild(kEnabledTopicsKey);
   for (int index = 0; index < enabled_topics.listLength(); ++index) {
@@ -76,18 +87,26 @@ void SensorTreePanel::load(const rviz_common::Config & config)
     }
   }
 
-  const auto expanded_categories = config.mapGetChild(kExpandedCategoriesKey);
-  for (int index = 0; index < expanded_categories.listLength(); ++index) {
-    auto entry = expanded_categories.listChildAt(index);
-    QString category_name;
+  const auto suppressed_topics = config.mapGetChild(kSuppressedTopicsKey);
+  for (int index = 0; index < suppressed_topics.listLength(); ++index) {
+    QString topic_name;
+    if (suppressed_topics.listChildAt(index).mapGetString(kTopicNameKey, &topic_name)) {
+      suppressed_auto_enable_topics_.insert(topic_name.toStdString());
+    }
+  }
+
+  const auto expanded_groups = config.mapGetChild(kExpandedGroupsKey);
+  for (int index = 0; index < expanded_groups.listLength(); ++index) {
+    auto entry = expanded_groups.listChildAt(index);
+    QString group_key;
     bool is_expanded = true;
 
-    if (!entry.mapGetString(kCategoryNameKey, &category_name)) {
+    if (!entry.mapGetString(kGroupKey, &group_key)) {
       continue;
     }
 
     entry.mapGetBool(kExpandedKey, &is_expanded);
-    persisted_category_expansion_[category_name.toStdString()] = is_expanded;
+    persisted_group_expansion_[group_key.toStdString()] = is_expanded;
   }
 
   config.mapGetBool(kAutoEnableNewTopicsKey, &auto_enable_new_topics_);
@@ -109,11 +128,17 @@ void SensorTreePanel::save(rviz_common::Config config) const
     entry.mapSetValue(kTopicNameKey, QString::fromStdString(topic_name));
   }
 
-  auto expanded_categories = config.mapMakeChild(kExpandedCategoriesKey);
-  for (const auto & [category_name, expanded] : persisted_category_expansion_) {
-    auto entry = expanded_categories.listAppendNew();
-    entry.mapSetValue(kCategoryNameKey, QString::fromStdString(category_name));
+  auto expanded_groups = config.mapMakeChild(kExpandedGroupsKey);
+  for (const auto & [group_key, expanded] : persisted_group_expansion_) {
+    auto entry = expanded_groups.listAppendNew();
+    entry.mapSetValue(kGroupKey, QString::fromStdString(group_key));
     entry.mapSetValue(kExpandedKey, expanded);
+  }
+
+  auto suppressed_topics = config.mapMakeChild(kSuppressedTopicsKey);
+  for (const auto & topic_name : suppressed_auto_enable_topics_) {
+    auto entry = suppressed_topics.listAppendNew();
+    entry.mapSetValue(kTopicNameKey, QString::fromStdString(topic_name));
   }
 
   config.mapSetValue(kAutoEnableNewTopicsKey, auto_enable_new_topics_);
@@ -129,14 +154,17 @@ void SensorTreePanel::refreshTopics()
   const auto latest_topics = topic_scanner_.scan(node_);
   if (auto_enable_new_topics_) {
     for (const auto & topic : latest_topics) {
-      if (known_topics.count(topic.name) == 0) {
+      if (
+        known_topics.count(topic.name) == 0 &&
+        suppressed_auto_enable_topics_.count(topic.name) == 0)
+      {
         persisted_enabled_topics_.insert(topic.name);
       }
     }
   }
 
   sensor_catalog_.update(latest_topics);
-  rememberCategoryExpansionStates();
+  rememberGroupExpansionStates();
   rebuildTree();
   reconcileDesiredDisplays();
   updateStatusLabel();
@@ -159,8 +187,10 @@ void SensorTreePanel::handleTreeItemChanged(QTreeWidgetItem * item, int column)
   const bool should_enable = item->checkState(kNameColumn) == Qt::Checked;
   if (should_enable) {
     persisted_enabled_topics_.insert(topic_name);
+    suppressed_auto_enable_topics_.erase(topic_name);
   } else {
     persisted_enabled_topics_.erase(topic_name);
+    suppressed_auto_enable_topics_.insert(topic_name);
   }
 
   if (display_registry_.hasDisplay(topic_name)) {
@@ -241,11 +271,11 @@ void SensorTreePanel::buildUi()
   QObject::connect(
     tree_widget_, &QTreeWidget::itemChanged, this, &SensorTreePanel::handleTreeItemChanged);
   QObject::connect(tree_widget_, &QTreeWidget::itemExpanded, this, [this](QTreeWidgetItem *) {
-    rememberCategoryExpansionStates();
+    rememberGroupExpansionStates();
     Q_EMIT configChanged();
   });
   QObject::connect(tree_widget_, &QTreeWidget::itemCollapsed, this, [this](QTreeWidgetItem *) {
-    rememberCategoryExpansionStates();
+    rememberGroupExpansionStates();
     Q_EMIT configChanged();
   });
 }
@@ -278,38 +308,69 @@ void SensorTreePanel::rebuildTree()
     category_item->setText(kNameColumn, QString::fromStdString(toString(category)));
     category_item->setText(kStateColumn, "Category");
     category_item->setFlags(category_item->flags() & ~Qt::ItemIsUserCheckable);
+    category_item->setData(
+      kNameColumn, kTreeItemTypeRole, static_cast<int>(TreeItemType::Category));
+    category_item->setData(
+      kNameColumn, kTreeItemGroupKeyRole, QString::fromStdString(toString(category)));
 
     const auto group = groups.find(category);
     if (group == groups.end()) {
-      category_item->setExpanded(shouldCategoryStartExpanded(category));
+      category_item->setExpanded(shouldGroupStartExpanded(toString(category)));
       continue;
     }
 
-    int available_in_group = 0;
-    for (const auto & topic : group->second) {
-      auto * topic_item = new QTreeWidgetItem(category_item);
-      topic_item->setFlags(topic_item->flags() | Qt::ItemIsUserCheckable);
-      topic_item->setText(
-        kNameColumn,
-        QString::fromStdString(topic.name + (topic.is_available ? "" : " (offline)")));
-      topic_item->setText(kStateColumn, topic.is_available ? "Available" : "Offline");
-      topic_item->setData(kNameColumn, Qt::UserRole, QString::fromStdString(topic.name));
-      topic_item->setData(kNameColumn, Qt::UserRole + 1, QString::fromStdString(topic.message_type));
-      topic_item->setCheckState(
-        kNameColumn,
-        shouldTopicStartEnabled(topic.name) ? Qt::Checked : Qt::Unchecked);
+    int available_in_category = 0;
+    for (const auto & device_group : group->second) {
+      auto * group_item = new QTreeWidgetItem(category_item);
+      group_item->setText(kNameColumn, QString::fromStdString(device_group.label));
+      group_item->setFlags(group_item->flags() & ~Qt::ItemIsUserCheckable);
+      group_item->setData(
+        kNameColumn, kTreeItemTypeRole, static_cast<int>(TreeItemType::Group));
+      group_item->setData(
+        kNameColumn, kTreeItemGroupKeyRole, QString::fromStdString(device_group.key));
 
-      if (topic.is_available) {
-        ++available_in_group;
+      int available_in_group = 0;
+      for (const auto & topic : device_group.topics) {
+        auto * topic_item = new QTreeWidgetItem(group_item);
+        topic_item->setFlags(topic_item->flags() | Qt::ItemIsUserCheckable);
+        topic_item->setText(
+          kNameColumn,
+          QString::fromStdString(topic.topic_label + (topic.is_available ? "" : " (offline)")));
+        topic_item->setText(kStateColumn, topic.is_available ? "Available" : "Offline");
+        topic_item->setData(kNameColumn, Qt::UserRole, QString::fromStdString(topic.name));
+        topic_item->setData(kNameColumn, Qt::UserRole + 1, QString::fromStdString(topic.message_type));
+        topic_item->setData(
+          kNameColumn, kTreeItemTypeRole, static_cast<int>(TreeItemType::Topic));
+        topic_item->setCheckState(
+          kNameColumn,
+          shouldTopicStartEnabled(topic.name) ? Qt::Checked : Qt::Unchecked);
+
+        if (topic.is_available) {
+          ++available_in_group;
+          ++available_in_category;
+        }
       }
+
+      group_item->setText(
+        kStateColumn,
+        QString("%1 total / %2 available")
+        .arg(static_cast<int>(device_group.topics.size()))
+        .arg(available_in_group));
+      group_item->setExpanded(shouldGroupStartExpanded(device_group.key));
     }
 
     category_item->setText(
       kStateColumn,
       QString("%1 total / %2 available")
-      .arg(static_cast<int>(group->second.size()))
-      .arg(available_in_group));
-    category_item->setExpanded(shouldCategoryStartExpanded(category));
+      .arg([&group]() {
+        int total = 0;
+        for (const auto & device_group : group->second) {
+          total += static_cast<int>(device_group.topics.size());
+        }
+        return total;
+      }())
+      .arg(available_in_category));
+    category_item->setExpanded(shouldGroupStartExpanded(toString(category)));
   }
 
   tree_widget_->resizeColumnToContents(kNameColumn);
@@ -344,10 +405,14 @@ void SensorTreePanel::syncEnabledTopicsFromTree()
   persisted_enabled_topics_.clear();
 
   const auto groups = sensor_catalog_.groupedTopics();
-  for (const auto & [_, topics] : groups) {
-    for (const auto & topic : topics) {
-      if (display_registry_.isEnabled(topic.name) || previously_enabled_topics.count(topic.name) > 0) {
-        persisted_enabled_topics_.insert(topic.name);
+  for (const auto & [_, device_groups] : groups) {
+    for (const auto & device_group : device_groups) {
+      for (const auto & topic : device_group.topics) {
+        if (display_registry_.isEnabled(topic.name) ||
+          previously_enabled_topics.count(topic.name) > 0)
+        {
+          persisted_enabled_topics_.insert(topic.name);
+        }
       }
     }
   }
@@ -358,8 +423,10 @@ void SensorTreePanel::setAllTopicsEnabled(bool enabled)
   for (const auto & topic : sensor_catalog_.allTopics()) {
     if (enabled) {
       persisted_enabled_topics_.insert(topic.name);
+      suppressed_auto_enable_topics_.erase(topic.name);
     } else {
       persisted_enabled_topics_.erase(topic.name);
+      suppressed_auto_enable_topics_.insert(topic.name);
     }
 
     if (display_registry_.hasDisplay(topic.name)) {
@@ -421,31 +488,46 @@ bool SensorTreePanel::shouldTopicStartEnabled(const std::string & topic_name) co
   return display_registry_.isEnabled(topic_name) || persisted_enabled_topics_.count(topic_name) > 0;
 }
 
-bool SensorTreePanel::shouldCategoryStartExpanded(SensorCategory category) const
+bool SensorTreePanel::shouldGroupStartExpanded(const std::string & group_key) const
 {
-  const auto category_name = toString(category);
-  const auto iter = persisted_category_expansion_.find(category_name);
-  if (iter == persisted_category_expansion_.end()) {
+  const auto iter = persisted_group_expansion_.find(group_key);
+  if (iter == persisted_group_expansion_.end()) {
     return true;
   }
 
   return iter->second;
 }
 
-void SensorTreePanel::rememberCategoryExpansionStates()
+void SensorTreePanel::rememberGroupExpansionStates()
 {
   if (!tree_widget_) {
     return;
   }
 
+  std::vector<QTreeWidgetItem *> pending_items;
   for (int index = 0; index < tree_widget_->topLevelItemCount(); ++index) {
-    auto * category_item = tree_widget_->topLevelItem(index);
-    if (!category_item) {
+    if (auto * item = tree_widget_->topLevelItem(index)) {
+      pending_items.push_back(item);
+    }
+  }
+
+  while (!pending_items.empty()) {
+    auto * item = pending_items.back();
+    pending_items.pop_back();
+    if (!item) {
       continue;
     }
 
-    persisted_category_expansion_[category_item->text(kNameColumn).toStdString()] =
-      category_item->isExpanded();
+    if (item->childCount() > 0) {
+      const auto group_key = item->data(kNameColumn, kTreeItemGroupKeyRole).toString().toStdString();
+      if (!group_key.empty()) {
+        persisted_group_expansion_[group_key] = item->isExpanded();
+      }
+    }
+
+    for (int index = 0; index < item->childCount(); ++index) {
+      pending_items.push_back(item->child(index));
+    }
   }
 }
 
