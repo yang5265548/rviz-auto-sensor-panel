@@ -46,6 +46,13 @@ bool DisplayRegistry::isEnabled(const std::string & topic_name) const
   }
 
   if (entry->second.display) {
+    if (auto * enabled_property = entry->second.display->subProp("Value")) {
+      const auto value = enabled_property->getValue();
+      if (value.isValid()) {
+        return value.toBool();
+      }
+    }
+
     return entry->second.display->isEnabled();
   }
 
