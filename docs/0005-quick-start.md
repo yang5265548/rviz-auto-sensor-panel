@@ -102,6 +102,8 @@ Expected result:
   You do not need to manually add `LaserScan`, `Image`, or `PointCloud2`
 - 取消勾选时，该 display 会被禁用  
   Unchecking disables the display
+- 面板 `State` 列会显示 publisher 数量；离线保留的 topic 会显示 `Offline`  
+  The panel `State` column shows publisher counts; retained offline topics are shown as `Offline`
 
 当前面板还支持这些更省操作的交互：  
 The panel now also supports these lower-effort interactions:

@@ -21,6 +21,7 @@ struct DiscoveredTopic
   std::string message_type;
   SensorCategory category{SensorCategory::Unknown};
   bool is_available{true};
+  std::size_t publisher_count{0};
   std::string group_key;
   std::string group_label;
   std::string topic_label;

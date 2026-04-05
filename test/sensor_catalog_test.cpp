@@ -10,12 +10,12 @@ TEST(SensorCatalogTest, marksMissingTopicsAsOfflineInsteadOfDeletingThem)
   SensorCatalog catalog;
 
   catalog.update({
-    DiscoveredTopic{"/front/scan", "sensor_msgs/msg/LaserScan", SensorCategory::Lidar, true},
-    DiscoveredTopic{"/camera/left/image_raw", "sensor_msgs/msg/Image", SensorCategory::Camera, true}
+    DiscoveredTopic{"/front/scan", "sensor_msgs/msg/LaserScan", SensorCategory::Lidar, true, 1},
+    DiscoveredTopic{"/camera/left/image_raw", "sensor_msgs/msg/Image", SensorCategory::Camera, true, 2}
   });
 
   catalog.update({
-    DiscoveredTopic{"/front/scan", "sensor_msgs/msg/LaserScan", SensorCategory::Lidar, true}
+    DiscoveredTopic{"/front/scan", "sensor_msgs/msg/LaserScan", SensorCategory::Lidar, true, 1}
   });
 
   const auto topics = catalog.allTopics();
@@ -26,6 +26,7 @@ TEST(SensorCatalogTest, marksMissingTopicsAsOfflineInsteadOfDeletingThem)
     if (topic.name == "/camera/left/image_raw") {
       found_offline_camera = true;
       EXPECT_FALSE(topic.is_available);
+      EXPECT_EQ(topic.publisher_count, 0u);
       EXPECT_EQ(topic.category, SensorCategory::Camera);
     }
   }
@@ -38,9 +39,9 @@ TEST(SensorCatalogTest, groupsTopicsByCategory)
   SensorCatalog catalog;
 
   catalog.update({
-    DiscoveredTopic{"/front/scan", "sensor_msgs/msg/LaserScan", SensorCategory::Lidar, true},
-    DiscoveredTopic{"/rear/scan", "sensor_msgs/msg/LaserScan", SensorCategory::Lidar, true},
-    DiscoveredTopic{"/camera/left/image_raw", "sensor_msgs/msg/Image", SensorCategory::Camera, true}
+    DiscoveredTopic{"/front/scan", "sensor_msgs/msg/LaserScan", SensorCategory::Lidar, true, 1},
+    DiscoveredTopic{"/rear/scan", "sensor_msgs/msg/LaserScan", SensorCategory::Lidar, true, 1},
+    DiscoveredTopic{"/camera/left/image_raw", "sensor_msgs/msg/Image", SensorCategory::Camera, true, 1}
   });
 
   const auto groups = catalog.groupedTopics();
@@ -63,6 +64,7 @@ TEST(SensorCatalogTest, mergesTopicsIntoStableDeviceGroups)
       "sensor_msgs/msg/LaserScan",
       SensorCategory::Lidar,
       true,
+      1,
       "lidar:robot_front",
       "Robot Front Lidar",
       "/robot/front/lidar/scan"
@@ -72,6 +74,7 @@ TEST(SensorCatalogTest, mergesTopicsIntoStableDeviceGroups)
       "sensor_msgs/msg/LaserScan",
       SensorCategory::Lidar,
       true,
+      1,
       "lidar:robot_front",
       "Robot Front Lidar",
       "/robot/front/lidar/scan_filtered"
@@ -94,6 +97,7 @@ TEST(SensorCatalogTest, sortsDirectionalGroupsInOperatorFriendlyOrder)
       "sensor_msgs/msg/LaserScan",
       SensorCategory::Lidar,
       true,
+      1,
       "lidar:rear",
       "Rear Lidar",
       "scan"
@@ -103,6 +107,7 @@ TEST(SensorCatalogTest, sortsDirectionalGroupsInOperatorFriendlyOrder)
       "sensor_msgs/msg/LaserScan",
       SensorCategory::Lidar,
       true,
+      1,
       "lidar:front",
       "Front Lidar",
       "scan"
@@ -112,6 +117,7 @@ TEST(SensorCatalogTest, sortsDirectionalGroupsInOperatorFriendlyOrder)
       "sensor_msgs/msg/LaserScan",
       SensorCategory::Lidar,
       true,
+      1,
       "lidar:left",
       "Left Lidar",
       "scan"

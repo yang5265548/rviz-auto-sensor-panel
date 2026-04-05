@@ -38,6 +38,17 @@ enum class TreeItemType
   Topic
 };
 
+QString publisherSummary(const DiscoveredTopic & topic)
+{
+  if (!topic.is_available) {
+    return "Offline";
+  }
+
+  return QString("%1 publisher%2")
+         .arg(static_cast<qulonglong>(topic.publisher_count))
+         .arg(topic.publisher_count == 1 ? "" : "s");
+}
+
 }  // namespace
 
 SensorTreePanel::SensorTreePanel(QWidget * parent)
@@ -409,16 +420,17 @@ void SensorTreePanel::rebuildTree()
         topic_item->setText(
           kNameColumn,
           QString::fromStdString(topic.topic_label + (topic.is_available ? "" : " (offline)")));
-        topic_item->setText(kStateColumn, topic.is_available ? "Available" : "Offline");
+        topic_item->setText(kStateColumn, publisherSummary(topic));
         topic_item->setData(kNameColumn, Qt::UserRole, QString::fromStdString(topic.name));
         topic_item->setData(kNameColumn, Qt::UserRole + 1, QString::fromStdString(topic.message_type));
         topic_item->setData(
           kNameColumn, kTreeItemTypeRole, static_cast<int>(TreeItemType::Topic));
         topic_item->setToolTip(
           kNameColumn,
-          QString("Topic: %1\nType: %2")
+          QString("Topic: %1\nType: %2\nPublishers: %3")
           .arg(QString::fromStdString(topic.name))
-          .arg(QString::fromStdString(topic.message_type)));
+          .arg(QString::fromStdString(topic.message_type))
+          .arg(static_cast<qulonglong>(topic.publisher_count)));
         topic_item->setCheckState(
           kNameColumn,
           shouldTopicStartEnabled(topic.name) ? Qt::Checked : Qt::Unchecked);
@@ -436,9 +448,10 @@ void SensorTreePanel::rebuildTree()
         .arg(available_in_group));
       group_item->setToolTip(
         kNameColumn,
-        QString("Device group: %1\nTopics: %2")
+        QString("Device group: %1\nTopics: %2\nAvailable: %3")
         .arg(QString::fromStdString(device_group.label))
-        .arg(static_cast<int>(device_group.topics.size())));
+        .arg(static_cast<int>(device_group.topics.size()))
+        .arg(available_in_group));
       group_item->setCheckState(kNameColumn, determineAggregateCheckState(group_item));
       group_item->setExpanded(shouldGroupStartExpanded(device_group.key));
     }
@@ -456,8 +469,9 @@ void SensorTreePanel::rebuildTree()
       .arg(available_in_category));
     category_item->setToolTip(
       kNameColumn,
-      QString("Sensor category: %1")
-      .arg(QString::fromStdString(toString(category))));
+      QString("Sensor category: %1\nAvailable topics: %2")
+      .arg(QString::fromStdString(toString(category)))
+      .arg(available_in_category));
     category_item->setCheckState(kNameColumn, determineAggregateCheckState(category_item));
     category_item->setExpanded(shouldGroupStartExpanded(toString(category)));
   }

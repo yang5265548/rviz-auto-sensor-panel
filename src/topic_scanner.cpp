@@ -31,6 +31,7 @@ std::vector<DiscoveredTopic> TopicScanner::scan(const rclcpp::Node::SharedPtr & 
         message_type,
         topic_profile.category,
         true,
+        node->count_publishers(topic_name),
         topic_profile.group_key,
         topic_profile.group_label,
         topic_profile.topic_label

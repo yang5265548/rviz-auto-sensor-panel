@@ -67,6 +67,7 @@ void SensorCatalog::update(const std::vector<DiscoveredTopic> & latest_topics)
   for (auto & [topic_name, topic] : topics_by_name_) {
     if (seen_topics.find(topic_name) == seen_topics.end()) {
       topic.is_available = false;
+      topic.publisher_count = 0;
     }
   }
 }
