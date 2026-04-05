@@ -44,12 +44,14 @@ Initial supported message types:
 ## 项目状态 | Project Status
 
 项目目前处于规划与架构设计阶段。  
-The project is currently in the planning and architecture phase.
+The project is currently in the planning, architecture, and scaffolding phase.
 
 需求基线文档：  
 Requirements baseline:
 
 - [MVP Baseline / MVP 基线](./docs/0001-rviz-auto-sensor-panel-mvp.md)
+- [Architecture / 架构设计](./docs/0002-rviz-auto-sensor-panel-architecture.md)
+- [Development Setup / 开发环境](./docs/0003-development-setup.md)
 
 ## 计划目录 | Planned Structure
 
@@ -64,9 +66,9 @@ Requirements baseline:
 
 - 完成插件架构设计  
   Finalize plugin architecture
-- 定义 package 结构  
-  Define package structure
-- 搭建 ROS 2 package 脚手架  
-  Scaffold the ROS 2 package
-- 实现 topic discovery 与 auto-display management  
-  Implement topic discovery and auto-display management
+- 扩展 topic discovery、状态同步和 display 管理逻辑  
+  Extend topic discovery, state synchronization, and display management logic
+- 增加更多测试与 RViz 手工验证步骤  
+  Add more tests and an RViz manual verification flow
+- 实现更完整的自动化交互体验  
+  Implement a more complete automation-oriented interaction flow

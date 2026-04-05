@@ -1,0 +1,10 @@
+<library path="rviz_auto_sensor_panel">
+  <class
+    name="rviz_auto_sensor_panel/SensorTreePanel"
+    type="rviz_auto_sensor_panel::SensorTreePanel"
+    base_class_type="rviz_common::Panel">
+    <description>
+      Auto-discovers supported ROS 2 sensor topics and creates matching RViz displays from a tree panel.
+    </description>
+  </class>
+</library>

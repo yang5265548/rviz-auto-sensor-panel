@@ -12,6 +12,7 @@ build/
 install/
 log/
 dist/
+vendor/
 
 # CMake
 CMakeCache.txt
