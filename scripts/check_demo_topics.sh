@@ -3,13 +3,13 @@
 set -euo pipefail
 
 ROOT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
+source "${ROOT_DIR}/scripts/common_ros_env.sh"
 mkdir -p "${ROOT_DIR}/.roslog"
 
 export ROS_LOG_DIR="${ROOT_DIR}/.roslog"
 
-set +u
-source /Users/young/ros2_jazzy/install/setup.sh
-set -u
+ensure_ros_environment
+setup_runtime_library_path
 
 TOPICS="$(ros2 topic list --no-daemon | grep -E '^/(demo|tf|tf_static)' || true)"
 

@@ -14,6 +14,13 @@ Run these from the project root:
 ./scripts/rebuild_install_local.sh
 ```
 
+如果你的 ROS 2 不在默认位置，先设置：  
+If your ROS 2 install is not in a default location, set this first:
+
+```bash
+export RVIZ_AUTO_SENSOR_PANEL_ROS_SETUP=/absolute/path/to/setup.bash
+```
+
 如果你只想最快打开“带 demo 数据的 RViz”，也可以直接用一键脚本：  
 If you want the fastest way to open RViz with demo data already running, you can use the one-command script:
 

@@ -32,6 +32,13 @@ The project does not yet ship as a system-wide binary package.
 - 已克隆本仓库  
   This repository has been cloned
 
+如果你的 ROS 2 不在默认位置，先设置：  
+If your ROS 2 install is not in a default location, set this first:
+
+```bash
+export RVIZ_AUTO_SENSOR_PANEL_ROS_SETUP=/absolute/path/to/setup.bash
+```
+
 ## 4. 安装命令 | Installation Command
 
 在项目根目录执行：  
@@ -44,6 +51,8 @@ Run this from the project root:
 这个脚本会：  
 This script will:
 
+- 自动探测并加载常见的 ROS 2 安装  
+  Auto-detect and load common ROS 2 installs
 - 准备本地 Python 开发依赖  
   Prepare local Python development dependencies
 - 配置、构建并安装 package  
@@ -133,8 +142,8 @@ If you want to quickly verify that the build and demo startup chain still works,
 
 ## 10. 当前限制 | Current Limitations
 
-- 当前只支持三类消息类型  
-  Only three message types are currently supported
+- 当前支持的消息类型仍是有限集合，不会自动接纳所有 ROS 2 topic  
+  The supported message types are still a finite set; not every ROS 2 topic is auto-included
 - 当前交付方式仍是源码安装  
   The current delivery mode is still source-based installation
 - 某些环境下自动 topic 检查可能受 DDS 可见性影响  

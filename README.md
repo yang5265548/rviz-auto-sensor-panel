@@ -8,6 +8,9 @@ An automation-oriented RViz plugin for ROS 2.
 这个项目希望减少 RViz 中重复、机械的配置步骤：自动发现受支持的 ROS 2 可视化 topic，在树形面板中组织展示，并按需创建匹配的 RViz display。  
 This project aims to reduce repetitive RViz setup by automatically discovering supported ROS 2 visualization topics, organizing them in a tree panel, and creating matching RViz displays on demand.
 
+脚本现在默认会自动探测常见的 ROS 2 安装位置；如果你的机器使用自定义安装路径，可以设置 `RVIZ_AUTO_SENSOR_PANEL_ROS_SETUP=/absolute/path/to/setup.bash`。  
+The scripts now auto-detect common ROS 2 install locations; if your machine uses a custom install path, set `RVIZ_AUTO_SENSOR_PANEL_ROS_SETUP=/absolute/path/to/setup.bash`.
+
 ## 愿景 | Vision
 
 用户不应该手动一个个添加和配置 display，而应该可以：  

@@ -3,6 +3,7 @@
 set -euo pipefail
 
 ROOT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
+source "${ROOT_DIR}/scripts/common_ros_env.sh"
 RULES_FILE=""
 
 if [[ "${1:-}" == "--with-rules" ]]; then
@@ -22,9 +23,7 @@ cleanup() {
 
 trap cleanup EXIT INT TERM
 
-set +u
-source /Users/young/ros2_jazzy/install/setup.sh
-set -u
+ensure_ros_environment
 
 "${ROOT_DIR}/scripts/run_demo_publisher.sh" &
 PUBLISHER_PID=$!

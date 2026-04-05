@@ -3,7 +3,8 @@
 set -euo pipefail
 
 ROOT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
-ROS_SETUP="/Users/young/ros2_jazzy/install/setup.sh"
+source "${ROOT_DIR}/scripts/common_ros_env.sh"
+ROS_SETUP="$(detect_ros_setup_path || true)"
 
 echo "Workspace: ${ROOT_DIR}"
 echo
@@ -33,13 +34,22 @@ check_command rviz2
 check_command ros2
 echo
 
-check_path "ROS setup" "${ROS_SETUP}"
+if [[ -n "${ROS_SETUP}" ]]; then
+  check_path "ROS setup" "${ROS_SETUP}"
+else
+  echo "[WARN] ROS setup: not detected automatically"
+  echo "       Set RVIZ_AUTO_SENSOR_PANEL_ROS_SETUP=/absolute/path/to/setup.bash"
+fi
 check_path "Vendor catkin_pkg" "${ROOT_DIR}/vendor/catkin_pkg"
 check_path "Build dir" "${ROOT_DIR}/build"
 check_path "Install dir" "${ROOT_DIR}/install"
 check_path "Plugin XML" "${ROOT_DIR}/rviz_common_plugins.xml"
 check_path "Default preset" "${ROOT_DIR}/config/default_demo.rviz"
-check_path "Installed plugin library" "${ROOT_DIR}/install/lib/librviz_auto_sensor_panel.dylib"
+if [[ "$(uname -s)" == "Darwin" ]]; then
+  check_path "Installed plugin library" "${ROOT_DIR}/install/lib/librviz_auto_sensor_panel.dylib"
+else
+  check_path "Installed plugin library" "${ROOT_DIR}/install/lib/librviz_auto_sensor_panel.so"
+fi
 check_path "Installed demo publisher" "${ROOT_DIR}/install/lib/rviz_auto_sensor_panel/demo_sensor_publisher"
 
 echo

@@ -3,6 +3,7 @@
 set -euo pipefail
 
 ROOT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
+source "${ROOT_DIR}/scripts/common_ros_env.sh"
 
 cleanup() {
   if [[ -n "${PUBLISHER_PID:-}" ]] && kill -0 "${PUBLISHER_PID}" 2>/dev/null; then
@@ -13,9 +14,7 @@ cleanup() {
 
 trap cleanup EXIT INT TERM
 
-set +u
-source /Users/young/ros2_jazzy/install/setup.sh
-set -u
+ensure_ros_environment
 
 "${ROOT_DIR}/scripts/rebuild_install_local.sh"
 "${ROOT_DIR}/scripts/run_demo_publisher.sh" &
