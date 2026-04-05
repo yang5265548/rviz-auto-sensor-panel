@@ -1,7 +1,10 @@
 #ifndef RVIZ_AUTO_SENSOR_PANEL__SENSOR_TREE_PANEL_HPP_
 #define RVIZ_AUTO_SENSOR_PANEL__SENSOR_TREE_PANEL_HPP_
 
+#include <map>
 #include <memory>
+#include <set>
+#include <string>
 
 #include <QLabel>
 #include <QPushButton>
@@ -28,6 +31,8 @@ public:
   ~SensorTreePanel() override;
 
   void onInitialize() override;
+  void load(const rviz_common::Config & config) override;
+  void save(rviz_common::Config config) const override;
 
 private Q_SLOTS:
   void refreshTopics();
@@ -38,7 +43,11 @@ private:
   void buildUi();
   void rebuildTree();
   void updateStatusLabel();
-  void setTreeSignalsBlocked(bool blocked);
+  void syncEnabledTopicsFromTree();
+  void reconcileDesiredDisplays();
+  bool shouldTopicStartEnabled(const std::string & topic_name) const;
+  bool shouldCategoryStartExpanded(SensorCategory category) const;
+  void rememberCategoryExpansionStates();
 
   QLabel * status_label_;
   QPushButton * refresh_button_;
@@ -52,6 +61,8 @@ private:
   SensorCatalog sensor_catalog_;
   DisplayRegistry display_registry_;
   AutoDisplayFactory auto_display_factory_;
+  std::set<std::string> persisted_enabled_topics_;
+  std::map<std::string, bool> persisted_category_expansion_;
 };
 
 }  // namespace rviz_auto_sensor_panel

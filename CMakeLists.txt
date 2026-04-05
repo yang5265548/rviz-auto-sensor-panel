@@ -89,6 +89,40 @@ if(BUILD_TESTING)
       rclcpp
     )
   endif()
+
+  ament_add_gtest(sensor_catalog_test
+    test/sensor_catalog_test.cpp
+    src/sensor_catalog.cpp
+    src/sensor_classifier.cpp
+  )
+
+  if(TARGET sensor_catalog_test)
+    target_include_directories(sensor_catalog_test PUBLIC
+      $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>
+      $<INSTALL_INTERFACE:include>
+    )
+    ament_target_dependencies(sensor_catalog_test
+      rclcpp
+    )
+  endif()
+
+  ament_add_gtest(display_registry_test
+    test/display_registry_test.cpp
+    src/display_registry.cpp
+  )
+
+  if(TARGET display_registry_test)
+    target_include_directories(display_registry_test PUBLIC
+      $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>
+      $<INSTALL_INTERFACE:include>
+    )
+    ament_target_dependencies(display_registry_test
+      rclcpp
+    )
+    target_link_libraries(display_registry_test
+      rviz_common::rviz_common
+    )
+  endif()
 endif()
 
 ament_export_include_directories(include)

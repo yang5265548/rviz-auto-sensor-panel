@@ -52,6 +52,7 @@ Requirements baseline:
 - [MVP Baseline / MVP 基线](./docs/0001-rviz-auto-sensor-panel-mvp.md)
 - [Architecture / 架构设计](./docs/0002-rviz-auto-sensor-panel-architecture.md)
 - [Development Setup / 开发环境](./docs/0003-development-setup.md)
+- [RViz Manual Validation / 手工验证](./docs/0004-rviz-manual-validation.md)
 
 ## 计划目录 | Planned Structure
 
