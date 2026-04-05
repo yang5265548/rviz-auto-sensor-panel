@@ -43,8 +43,8 @@ Initial supported message types:
 
 ## 项目状态 | Project Status
 
-项目目前处于“可运行 MVP 原型”阶段。  
-The project is currently at the "working MVP prototype" stage.
+项目目前处于“可运行并可验证的 MVP”阶段。  
+The project is currently at the "working and verifiable MVP" stage.
 
 需求基线文档：  
 Requirements baseline:
@@ -71,13 +71,30 @@ Default rules configuration file:
 - `test/`：验证与集成支持  
   `test/`: validation and integration support
 
+## 当前已具备 | What Works Today
+
+- 自动发现 `LaserScan`、`Image`、`PointCloud2`  
+  Automatically discovers `LaserScan`, `Image`, and `PointCloud2`
+- 设备树分组与更友好的设备命名  
+  Groups topics into a device tree with friendlier labels
+- 勾选后自动创建对应 RViz display  
+  Automatically creates matching RViz displays when checked
+- `Enable All` / `Disable All` / `Auto-enable new topics`  
+  `Enable All` / `Disable All` / `Auto-enable new topics`
+- 记住手动关闭过的 topic，避免刷新后立即反弹  
+  Remembers manually disabled topics to avoid immediate re-enabling on refresh
+- 通过规则文件覆盖 topic 分组命名  
+  Allows topic-grouping overrides through rule files
+- Demo publisher、快速启动脚本与本地 smoke test  
+  Includes a demo publisher, quick-launch scripts, and a local smoke test
+
 ## 下一步 | Next Steps
 
-- 完成插件架构设计  
-  Finalize plugin architecture
-- 扩展 topic discovery、状态同步和 display 管理逻辑  
-  Extend topic discovery, state synchronization, and display management logic
-- 增加更多测试与 RViz 手工验证步骤  
-  Add more tests and an RViz manual verification flow
-- 实现更完整的自动化交互体验  
-  Implement a more complete automation-oriented interaction flow
+- 增加更多传感器类型支持  
+  Add support for more sensor message types
+- 引入更细粒度的设备模板与项目级规则  
+  Introduce richer device templates and project-level rules
+- 补更多 RViz 行为回归测试  
+  Add more RViz behavior regression coverage
+- 继续减少首次使用时的手工步骤  
+  Continue reducing manual steps during first-time setup

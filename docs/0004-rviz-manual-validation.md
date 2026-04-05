@@ -16,6 +16,8 @@ This round of manual validation should confirm:
   The panel can scan the current ROS graph
 - 支持的 topic 会按类别出现在树中  
   Supported topics appear in the tree by category
+- 面板会显示 publisher 数量与离线状态  
+  The panel shows publisher counts and offline state
 - 勾选 topic 后会自动创建对应 display  
   Checking a topic automatically creates the matching display
 - 保存 RViz 配置后，面板能恢复勾选和展开状态  
@@ -93,6 +95,8 @@ Expected result:
   The panel shows `Lidar`, `Camera`, and `Point Cloud` categories
 - 对应 topic 出现在分类下  
   Matching topics appear under those categories
+- `State` 列会显示每个 topic 的 publisher 数量  
+  The `State` column shows the publisher count for each topic
 - 下线 topic 会显示 `Offline`  
   Offline topics are shown as `Offline`
 

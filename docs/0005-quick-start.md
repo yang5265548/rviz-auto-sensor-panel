@@ -14,6 +14,13 @@ Run these from the project root:
 ./scripts/rebuild_install_local.sh
 ```
 
+如果你只想最快打开“带 demo 数据的 RViz”，也可以直接用一键脚本：  
+If you want the fastest way to open RViz with demo data already running, you can use the one-command script:
+
+```bash
+./scripts/run_demo_stack.sh
+```
+
 ## 3. 启动演示数据 | Start Demo Topics
 
 打开一个终端，source 你的 ROS 2 环境后执行：  
@@ -57,6 +64,13 @@ Suggested order:
 
 ```bash
 ./scripts/run_rviz_local.sh
+```
+
+如果你想带自定义分组规则一起启动 demo，可以运行：  
+If you want to launch the demo together with custom grouping rules, run:
+
+```bash
+./scripts/run_demo_stack.sh --with-rules "/absolute/path/to/topic_grouping_rules.ini"
 ```
 
 ## 5. 添加面板 | Add the Panel
@@ -187,6 +201,13 @@ Terminal 3, optional verification:
 
 ```bash
 ./scripts/check_demo_topics.sh
+```
+
+如果你只是想跑一次本地冒烟验证，不打开 RViz，可以执行：  
+If you only want to run a local smoke test without opening RViz, run:
+
+```bash
+./scripts/smoke_test_local.sh
 ```
 
 ## 10. 可直接复制的验证命令 | Copy-Paste Validation Commands
