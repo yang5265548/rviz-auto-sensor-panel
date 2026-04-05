@@ -1,49 +1,72 @@
 # rviz-auto-sensor-panel
 
+中文 | English
+
+面向 ROS 2 的自动化 RViz 插件。  
 An automation-oriented RViz plugin for ROS 2.
 
+这个项目希望减少 RViz 中重复、机械的配置步骤：自动发现受支持的传感器 topic，在树形面板中组织展示，并按需创建匹配的 RViz display。  
 This project aims to reduce repetitive RViz setup by automatically discovering supported sensor topics, organizing them in a tree panel, and creating matching RViz displays on demand.
 
-## Vision
+## 愿景 | Vision
 
+用户不应该手动一个个添加和配置 display，而应该可以：  
 Instead of manually adding and configuring each display, users should be able to:
 
-- see discovered sensors automatically
-- browse them in a structured panel
-- enable the sensor they want with minimal setup
+- 自动看到已发现的传感器  
+  See discovered sensors automatically
+- 在结构化面板中浏览它们  
+  Browse them in a structured panel
+- 以最少配置启用想看的传感器  
+  Enable the sensor they want with minimal setup
 
-## MVP
+## MVP | MVP
 
+第一版聚焦以下能力：  
 The first version focuses on:
 
-- automatic discovery of supported ROS 2 topics
-- classification by message type
-- a tree-based RViz panel
-- automatic creation of matching RViz displays
+- 自动发现受支持的 ROS 2 topics  
+  Automatic discovery of supported ROS 2 topics
+- 按消息类型分类  
+  Classification by message type
+- 树状 RViz 面板  
+  A tree-based RViz panel
+- 自动创建匹配的 RViz displays  
+  Automatic creation of matching RViz displays
 
+初始支持的消息类型：  
 Initial supported message types:
 
 - `sensor_msgs/msg/LaserScan`
 - `sensor_msgs/msg/Image`
 - `sensor_msgs/msg/PointCloud2`
 
-## Project Status
+## 项目状态 | Project Status
 
+项目目前处于规划与架构设计阶段。  
 The project is currently in the planning and architecture phase.
 
+需求基线文档：  
 Requirements baseline:
 
-- [MVP Baseline](./docs/0001-rviz-auto-sensor-panel-mvp.md)
+- [MVP Baseline / MVP 基线](./docs/0001-rviz-auto-sensor-panel-mvp.md)
 
-## Planned Structure
+## 计划目录 | Planned Structure
 
-- `docs/` for product and architecture documents
-- `src/` for implementation packages
-- `test/` for validation and integration support
+- `docs/`：产品、架构与设计文档  
+  `docs/`: product, architecture, and design documents
+- `src/`：实现代码包  
+  `src/`: implementation packages
+- `test/`：验证与集成支持  
+  `test/`: validation and integration support
 
-## Next Steps
+## 下一步 | Next Steps
 
-- finalize plugin architecture
-- define package structure
-- scaffold the ROS 2 package
-- implement topic discovery and auto-display management
+- 完成插件架构设计  
+  Finalize plugin architecture
+- 定义 package 结构  
+  Define package structure
+- 搭建 ROS 2 package 脚手架  
+  Scaffold the ROS 2 package
+- 实现 topic discovery 与 auto-display management  
+  Implement topic discovery and auto-display management
