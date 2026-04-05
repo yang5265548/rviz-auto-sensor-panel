@@ -53,7 +53,7 @@ else
 fi
 
 if [[ -n "${RULES_FILE}" ]]; then
-  exec "${ROOT_DIR}/scripts/run_rviz_with_rules.sh" "${RULES_FILE}"
+  export RVIZ_AUTO_SENSOR_PANEL_RULES_FILE="${RULES_FILE}"
 fi
 
-exec "${ROOT_DIR}/scripts/run_rviz_local.sh"
+exec "${ROOT_DIR}/scripts/run_rviz_preset.sh"

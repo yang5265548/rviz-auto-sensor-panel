@@ -55,12 +55,14 @@ Requirements baseline:
 - [RViz Manual Validation / 手工验证](./docs/0004-rviz-manual-validation.md)
 - [Quick Start / 快速启动](./docs/0005-quick-start.md)
 - [Topic Grouping Rules / Topic 分组规则](./docs/0006-topic-grouping-rules.md)
+- [User Installation / 用户安装指南](./docs/0007-user-installation.md)
 
 默认规则配置文件：  
 Default rules configuration file:
 
 - `config/topic_grouping_rules.ini`
 - `config/example_topic_grouping_rules.ini`
+- `config/default_demo.rviz`
 
 ## 计划目录 | Planned Structure
 

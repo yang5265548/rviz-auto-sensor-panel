@@ -21,6 +21,9 @@ If you want the fastest way to open RViz with demo data already running, you can
 ./scripts/run_demo_stack.sh
 ```
 
+这个命令会使用项目自带的 RViz 预设，因此默认会直接带出 `SensorTreePanel`，并把 `Fixed Frame` 设成 `map`。  
+This command uses the project RViz preset, so it should open with `SensorTreePanel` already loaded and `Fixed Frame` already set to `map`.
+
 ## 3. 启动演示数据 | Start Demo Topics
 
 打开一个终端，source 你的 ROS 2 环境后执行：  
@@ -66,6 +69,13 @@ Suggested order:
 ./scripts/run_rviz_local.sh
 ```
 
+如果你想直接用项目预设启动 RViz，而不是空白默认布局，推荐改用：  
+If you want to start RViz with the project preset instead of a blank default layout, prefer:
+
+```bash
+./scripts/run_rviz_preset.sh
+```
+
 如果你想带自定义分组规则一起启动 demo，可以运行：  
 If you want to launch the demo together with custom grouping rules, run:
 
@@ -75,8 +85,11 @@ If you want to launch the demo together with custom grouping rules, run:
 
 ## 5. 添加面板 | Add the Panel
 
-在 RViz 中：  
-Inside RViz:
+如果你是通过 `./scripts/run_rviz_preset.sh` 或 `./scripts/run_demo_stack.sh` 启动，通常不需要手动添加面板。  
+If you started through `./scripts/run_rviz_preset.sh` or `./scripts/run_demo_stack.sh`, you usually do not need to add the panel manually.
+
+如果你是通过 `./scripts/run_rviz_local.sh` 启动，则在 RViz 中执行：  
+If you started through `./scripts/run_rviz_local.sh`, then inside RViz:
 
 1. 打开 `Panels -> Add New Panel`  
    Open `Panels -> Add New Panel`
