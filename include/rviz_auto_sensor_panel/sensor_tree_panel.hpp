@@ -48,6 +48,7 @@ private:
   void buildUi();
   void rebuildTree();
   void updateStatusLabel();
+  void syncEnabledTopicsFromDisplays();
   void syncEnabledTopicsFromTree();
   void reconcileDesiredDisplays();
   void setAllTopicsEnabled(bool enabled);

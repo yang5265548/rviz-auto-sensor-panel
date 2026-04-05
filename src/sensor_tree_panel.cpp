@@ -157,6 +157,8 @@ void SensorTreePanel::save(rviz_common::Config config) const
 
 void SensorTreePanel::refreshTopics()
 {
+  syncEnabledTopicsFromDisplays();
+
   std::set<std::string> known_topics;
   for (const auto & topic : sensor_catalog_.allTopics()) {
     known_topics.insert(topic.name);
@@ -175,6 +177,22 @@ void SensorTreePanel::refreshTopics()
   rebuildTree();
   reconcileDesiredDisplays();
   updateStatusLabel();
+}
+
+void SensorTreePanel::syncEnabledTopicsFromDisplays()
+{
+  for (const auto & topic : sensor_catalog_.allTopics()) {
+    if (!display_registry_.hasDisplay(topic.name)) {
+      continue;
+    }
+
+    const bool enabled = display_registry_.isEnabled(topic.name);
+    rememberTopicEnabledState(
+      topic.name,
+      enabled,
+      &persisted_enabled_topics_,
+      &suppressed_auto_enable_topics_);
+  }
 }
 
 void SensorTreePanel::handleRefreshClicked()

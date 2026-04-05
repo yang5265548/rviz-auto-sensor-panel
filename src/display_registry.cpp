@@ -45,6 +45,10 @@ bool DisplayRegistry::isEnabled(const std::string & topic_name) const
     return false;
   }
 
+  if (entry->second.display) {
+    return entry->second.display->isEnabled();
+  }
+
   return entry->second.managed_display.is_enabled;
 }
 
