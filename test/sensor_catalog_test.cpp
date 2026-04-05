@@ -84,4 +84,45 @@ TEST(SensorCatalogTest, mergesTopicsIntoStableDeviceGroups)
   EXPECT_EQ(groups.at(SensorCategory::Lidar)[0].topics.size(), 2u);
 }
 
+TEST(SensorCatalogTest, sortsDirectionalGroupsInOperatorFriendlyOrder)
+{
+  SensorCatalog catalog;
+
+  catalog.update({
+    DiscoveredTopic{
+      "/robot/rear/scan",
+      "sensor_msgs/msg/LaserScan",
+      SensorCategory::Lidar,
+      true,
+      "lidar:rear",
+      "Rear Lidar",
+      "scan"
+    },
+    DiscoveredTopic{
+      "/robot/front/scan",
+      "sensor_msgs/msg/LaserScan",
+      SensorCategory::Lidar,
+      true,
+      "lidar:front",
+      "Front Lidar",
+      "scan"
+    },
+    DiscoveredTopic{
+      "/robot/left/scan",
+      "sensor_msgs/msg/LaserScan",
+      SensorCategory::Lidar,
+      true,
+      "lidar:left",
+      "Left Lidar",
+      "scan"
+    }
+  });
+
+  const auto groups = catalog.groupedTopics();
+  ASSERT_EQ(groups.at(SensorCategory::Lidar).size(), 3u);
+  EXPECT_EQ(groups.at(SensorCategory::Lidar)[0].label, "Front Lidar");
+  EXPECT_EQ(groups.at(SensorCategory::Lidar)[1].label, "Left Lidar");
+  EXPECT_EQ(groups.at(SensorCategory::Lidar)[2].label, "Rear Lidar");
+}
+
 }  // namespace rviz_auto_sensor_panel

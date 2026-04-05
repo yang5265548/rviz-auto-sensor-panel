@@ -196,6 +196,11 @@ bool isDirectionWord(const std::string & token)
   return std::find(directions.begin(), directions.end(), token) != directions.end();
 }
 
+std::set<std::string> leadingContextWords()
+{
+  return {"demo", "sim", "simulator", "example", "samples"};
+}
+
 std::vector<std::string> deriveIdentityTokens(
   const std::vector<std::string> & topic_tokens,
   SensorCategory category)
@@ -215,6 +220,11 @@ std::vector<std::string> deriveIdentityTokens(
       continue;
     }
     compact_tokens.push_back(token);
+  }
+
+  const auto context_words = leadingContextWords();
+  while (!compact_tokens.empty() && contains(context_words, compact_tokens.front())) {
+    compact_tokens.erase(compact_tokens.begin());
   }
 
   return compact_tokens;

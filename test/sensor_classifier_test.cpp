@@ -77,4 +77,13 @@ TEST(SensorClassifierTest, usesLeafTopicSegmentAsTopicLabel)
   EXPECT_EQ(lidar_topic.group_label, "Robot Front Camera");
 }
 
+TEST(SensorClassifierTest, ignoresLeadingDemoContextInGroupLabels)
+{
+  SensorClassifier classifier;
+
+  const auto demo_lidar =
+    classifier.classifyTopic("/demo/front/scan", "sensor_msgs/msg/LaserScan");
+  EXPECT_EQ(demo_lidar.group_label, "Front Lidar");
+}
+
 }  // namespace rviz_auto_sensor_panel
