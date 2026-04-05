@@ -26,6 +26,7 @@ constexpr char kExpandedCategoriesKey[] = "ExpandedCategories";
 constexpr char kTopicNameKey[] = "TopicName";
 constexpr char kCategoryNameKey[] = "CategoryName";
 constexpr char kExpandedKey[] = "Expanded";
+constexpr char kAutoEnableNewTopicsKey[] = "AutoEnableNewTopics";
 
 }  // namespace
 
@@ -33,9 +34,13 @@ SensorTreePanel::SensorTreePanel(QWidget * parent)
 : rviz_common::Panel(parent),
   status_label_(nullptr),
   refresh_button_(nullptr),
+  enable_all_button_(nullptr),
+  disable_all_button_(nullptr),
+  auto_enable_checkbox_(nullptr),
   tree_widget_(nullptr),
   refresh_timer_(nullptr),
-  topic_scanner_(SensorClassifier())
+  topic_scanner_(SensorClassifier()),
+  auto_enable_new_topics_(true)
 {
   buildUi();
 }
@@ -85,6 +90,11 @@ void SensorTreePanel::load(const rviz_common::Config & config)
     persisted_category_expansion_[category_name.toStdString()] = is_expanded;
   }
 
+  config.mapGetBool(kAutoEnableNewTopicsKey, &auto_enable_new_topics_);
+  if (auto_enable_checkbox_) {
+    auto_enable_checkbox_->setChecked(auto_enable_new_topics_);
+  }
+
   rebuildTree();
   updateStatusLabel();
 }
@@ -105,11 +115,20 @@ void SensorTreePanel::save(rviz_common::Config config) const
     entry.mapSetValue(kCategoryNameKey, QString::fromStdString(category_name));
     entry.mapSetValue(kExpandedKey, expanded);
   }
+
+  config.mapSetValue(kAutoEnableNewTopicsKey, auto_enable_new_topics_);
 }
 
 void SensorTreePanel::refreshTopics()
 {
-  sensor_catalog_.update(topic_scanner_.scan(node_));
+  const auto latest_topics = topic_scanner_.scan(node_);
+  if (auto_enable_new_topics_) {
+    for (const auto & topic : latest_topics) {
+      persisted_enabled_topics_.insert(topic.name);
+    }
+  }
+
+  sensor_catalog_.update(latest_topics);
   rememberCategoryExpansionStates();
   rebuildTree();
   reconcileDesiredDisplays();
@@ -183,8 +202,13 @@ void SensorTreePanel::buildUi()
 
   status_label_ = new QLabel("No supported topics discovered yet.");
   refresh_button_ = new QPushButton("Refresh");
+  enable_all_button_ = new QPushButton("Enable All");
+  disable_all_button_ = new QPushButton("Disable All");
+  auto_enable_checkbox_ = new QCheckBox("Auto-enable new topics");
   tree_widget_ = new QTreeWidget();
   refresh_timer_ = new QTimer(this);
+
+  auto_enable_checkbox_->setChecked(auto_enable_new_topics_);
 
   tree_widget_->setColumnCount(kTreeColumnCount);
   tree_widget_->setHeaderLabels(QStringList() << "Sensor / Topic" << "State");
@@ -194,12 +218,18 @@ void SensorTreePanel::buildUi()
   auto * header_layout = new QHBoxLayout();
   header_layout->addWidget(status_label_);
   header_layout->addStretch();
+  header_layout->addWidget(auto_enable_checkbox_);
+  header_layout->addWidget(enable_all_button_);
+  header_layout->addWidget(disable_all_button_);
   header_layout->addWidget(refresh_button_);
 
   layout->addLayout(header_layout);
   layout->addWidget(tree_widget_);
 
   QObject::connect(refresh_button_, &QPushButton::clicked, this, &SensorTreePanel::handleRefreshClicked);
+  QObject::connect(enable_all_button_, &QPushButton::clicked, this, &SensorTreePanel::handleEnableAllClicked);
+  QObject::connect(disable_all_button_, &QPushButton::clicked, this, &SensorTreePanel::handleDisableAllClicked);
+  QObject::connect(auto_enable_checkbox_, &QCheckBox::toggled, this, &SensorTreePanel::handleAutoEnableToggled);
   QObject::connect(refresh_timer_, &QTimer::timeout, this, &SensorTreePanel::refreshTopics);
   QObject::connect(
     tree_widget_, &QTreeWidget::itemChanged, this, &SensorTreePanel::handleTreeItemChanged);
@@ -211,6 +241,26 @@ void SensorTreePanel::buildUi()
     rememberCategoryExpansionStates();
     Q_EMIT configChanged();
   });
+}
+
+void SensorTreePanel::handleEnableAllClicked()
+{
+  setAllTopicsEnabled(true);
+}
+
+void SensorTreePanel::handleDisableAllClicked()
+{
+  setAllTopicsEnabled(false);
+}
+
+void SensorTreePanel::handleAutoEnableToggled(bool checked)
+{
+  auto_enable_new_topics_ = checked;
+  Q_EMIT configChanged();
+
+  if (checked) {
+    setAllTopicsEnabled(true);
+  }
 }
 
 void SensorTreePanel::rebuildTree()
@@ -298,6 +348,26 @@ void SensorTreePanel::syncEnabledTopicsFromTree()
       }
     }
   }
+}
+
+void SensorTreePanel::setAllTopicsEnabled(bool enabled)
+{
+  for (const auto & topic : sensor_catalog_.allTopics()) {
+    if (enabled) {
+      persisted_enabled_topics_.insert(topic.name);
+    } else {
+      persisted_enabled_topics_.erase(topic.name);
+    }
+
+    if (display_registry_.hasDisplay(topic.name)) {
+      display_registry_.setEnabled(topic.name, enabled);
+    }
+  }
+
+  rebuildTree();
+  reconcileDesiredDisplays();
+  updateStatusLabel();
+  Q_EMIT configChanged();
 }
 
 void SensorTreePanel::reconcileDesiredDisplays()

@@ -9,7 +9,7 @@ export ROS_LOG_DIR="${ROOT_DIR}/.roslog"
 
 set +u
 source /Users/young/ros2_jazzy/install/setup.sh
-source "${ROOT_DIR}/install/setup.sh"
+source "${ROOT_DIR}/install/share/rviz_auto_sensor_panel/local_setup.sh"
 set -u
 
 exec rviz2

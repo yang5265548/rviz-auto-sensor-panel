@@ -40,6 +40,11 @@ This process continuously publishes these demo topics:
 打开第二个终端，source ROS 2 环境，并让 RViz 能找到本地安装结果。  
 Open a second terminal, source ROS 2, and make sure RViz can discover the local install.
 
+说明：当前仓库使用的是 package 级安装结果，因此脚本会加载  
+`install/share/rviz_auto_sensor_panel/local_setup.sh`。  
+Note: this repository currently uses package-level install output, so the script loads  
+`install/share/rviz_auto_sensor_panel/local_setup.sh`.
+
 建议顺序：  
 Suggested order:
 
@@ -84,6 +89,16 @@ Expected result:
 - 取消勾选时，该 display 会被禁用  
   Unchecking disables the display
 
+当前面板还支持这些更省操作的交互：  
+The panel now also supports these lower-effort interactions:
+
+- `Auto-enable new topics`：新发现的支持 topic 自动创建 display  
+  `Auto-enable new topics`: automatically create displays for newly discovered supported topics
+- `Enable All`：一次启用所有已发现 topic  
+  `Enable All`: enable all discovered topics at once
+- `Disable All`：一次关闭所有已发现 topic  
+  `Disable All`: disable all discovered topics at once
+
 ## 7. 如果面板没出现 | If the Panel Does Not Appear
 
 请依次检查：  
@@ -91,8 +106,8 @@ Check these in order:
 
 1. `./scripts/install_local.sh` 是否执行成功  
    Whether `./scripts/install_local.sh` succeeded
-2. 当前终端是否执行了 `source ./install/setup.zsh`  
-   Whether the current terminal ran `source ./install/setup.zsh`
+2. 是否通过 `./scripts/run_rviz_local.sh` 启动 RViz  
+   Whether RViz was started through `./scripts/run_rviz_local.sh`
 3. `rviz_common_plugins.xml` 是否已安装到 `install/share/rviz_auto_sensor_panel/`  
    Whether `rviz_common_plugins.xml` was installed to `install/share/rviz_auto_sensor_panel/`
 

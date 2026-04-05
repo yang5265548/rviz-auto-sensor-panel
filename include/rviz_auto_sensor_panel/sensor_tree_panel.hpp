@@ -6,6 +6,7 @@
 #include <set>
 #include <string>
 
+#include <QCheckBox>
 #include <QLabel>
 #include <QPushButton>
 #include <QTimer>
@@ -38,6 +39,9 @@ private Q_SLOTS:
   void refreshTopics();
   void handleRefreshClicked();
   void handleTreeItemChanged(QTreeWidgetItem * item, int column);
+  void handleEnableAllClicked();
+  void handleDisableAllClicked();
+  void handleAutoEnableToggled(bool checked);
 
 private:
   void buildUi();
@@ -45,12 +49,16 @@ private:
   void updateStatusLabel();
   void syncEnabledTopicsFromTree();
   void reconcileDesiredDisplays();
+  void setAllTopicsEnabled(bool enabled);
   bool shouldTopicStartEnabled(const std::string & topic_name) const;
   bool shouldCategoryStartExpanded(SensorCategory category) const;
   void rememberCategoryExpansionStates();
 
   QLabel * status_label_;
   QPushButton * refresh_button_;
+  QPushButton * enable_all_button_;
+  QPushButton * disable_all_button_;
+  QCheckBox * auto_enable_checkbox_;
   QTreeWidget * tree_widget_;
   QTimer * refresh_timer_;
 
@@ -63,6 +71,7 @@ private:
   AutoDisplayFactory auto_display_factory_;
   std::set<std::string> persisted_enabled_topics_;
   std::map<std::string, bool> persisted_category_expansion_;
+  bool auto_enable_new_topics_;
 };
 
 }  // namespace rviz_auto_sensor_panel
