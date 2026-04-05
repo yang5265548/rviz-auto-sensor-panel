@@ -3,6 +3,7 @@
 #include <utility>
 
 #include <QHBoxLayout>
+#include <QHeaderView>
 #include <QSignalBlocker>
 #include <QString>
 #include <QVBoxLayout>
@@ -338,6 +339,8 @@ Qt::CheckState SensorTreePanel::determineAggregateCheckState(const QTreeWidgetIt
 void SensorTreePanel::buildUi()
 {
   auto * layout = new QVBoxLayout(this);
+  layout->setContentsMargins(4, 4, 4, 4);
+  layout->setSpacing(4);
 
   status_label_ = new QLabel("No supported topics discovered yet.");
   refresh_button_ = new QPushButton("Refresh");
@@ -353,16 +356,26 @@ void SensorTreePanel::buildUi()
   tree_widget_->setHeaderLabels(QStringList() << "Sensor / Topic" << "State");
   tree_widget_->setRootIsDecorated(true);
   tree_widget_->setAlternatingRowColors(true);
+  tree_widget_->header()->setStretchLastSection(false);
+  tree_widget_->header()->setSectionResizeMode(kNameColumn, QHeaderView::Stretch);
+  tree_widget_->header()->setSectionResizeMode(kStateColumn, QHeaderView::ResizeToContents);
+  tree_widget_->setHorizontalScrollBarPolicy(Qt::ScrollBarAsNeeded);
 
-  auto * header_layout = new QHBoxLayout();
-  header_layout->addWidget(status_label_);
-  header_layout->addStretch();
-  header_layout->addWidget(auto_enable_checkbox_);
-  header_layout->addWidget(enable_all_button_);
-  header_layout->addWidget(disable_all_button_);
-  header_layout->addWidget(refresh_button_);
+  auto * status_layout = new QHBoxLayout();
+  status_layout->setContentsMargins(0, 0, 0, 0);
+  status_layout->addWidget(status_label_);
+  status_layout->addStretch();
 
-  layout->addLayout(header_layout);
+  auto * controls_layout = new QHBoxLayout();
+  controls_layout->setContentsMargins(0, 0, 0, 0);
+  controls_layout->addWidget(auto_enable_checkbox_);
+  controls_layout->addStretch();
+  controls_layout->addWidget(enable_all_button_);
+  controls_layout->addWidget(disable_all_button_);
+  controls_layout->addWidget(refresh_button_);
+
+  layout->addLayout(status_layout);
+  layout->addLayout(controls_layout);
   layout->addWidget(tree_widget_);
 
   QObject::connect(refresh_button_, &QPushButton::clicked, this, &SensorTreePanel::handleRefreshClicked);
@@ -494,7 +507,6 @@ void SensorTreePanel::rebuildTree()
     category_item->setExpanded(shouldGroupStartExpanded(toString(category)));
   }
 
-  tree_widget_->resizeColumnToContents(kNameColumn);
   syncEnabledTopicsFromTree();
 }
 
