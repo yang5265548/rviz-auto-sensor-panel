@@ -57,6 +57,7 @@ Requirements baseline:
 - [Topic Grouping Rules / Topic 分组规则](./docs/0006-topic-grouping-rules.md)
 - [User Installation / 用户安装指南](./docs/0007-user-installation.md)
 - [Release Readiness / 发布准备度](./docs/0008-release-readiness.md)
+- [Maintainer Workflow / 维护者流程](./docs/0009-maintainer-workflow.md)
 
 默认规则配置文件：  
 Default rules configuration file:
@@ -70,6 +71,7 @@ Repository-level files:
 
 - `LICENSE`
 - `CHANGELOG.md`
+- `CONTRIBUTING.md`
 
 ## 计划目录 | Planned Structure
 
