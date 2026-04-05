@@ -98,6 +98,18 @@ setup_runtime_library_path() {
   for prefix in ${AMENT_PREFIX_PATH:-}; do
     if [[ -n "${prefix}" ]]; then
       prepend_library_path "${prefix}/lib"
+      local opt_lib
+      for opt_lib in "${prefix}"/opt/*/lib; do
+        if [[ -d "${opt_lib}" ]]; then
+          prepend_library_path "${opt_lib}"
+        fi
+      done
+    fi
+  done
+
+  for prefix in ${CMAKE_PREFIX_PATH:-}; do
+    if [[ -n "${prefix}" ]]; then
+      prepend_library_path "${prefix}/lib"
     fi
   done
   IFS="${old_ifs}"
