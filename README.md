@@ -60,6 +60,7 @@ Requirements baseline:
 Default rules configuration file:
 
 - `config/topic_grouping_rules.ini`
+- `config/example_topic_grouping_rules.ini`
 
 ## 计划目录 | Planned Structure
 

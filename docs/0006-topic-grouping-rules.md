@@ -145,6 +145,11 @@ cam=camera
 pc=pointcloud
 ```
 
+仓库里还提供了一份可直接试跑的示例覆盖文件：  
+The repository also includes an example override file you can try immediately:
+
+- `config/example_topic_grouping_rules.ini`
+
 ## 8. 结论 | Conclusion
 
 当前版本的分组不是“只针对你的电脑写死”，但也还没有达到“零配置覆盖所有 ROS 项目”的程度。  

@@ -143,6 +143,20 @@ The default rules example is here:
 
 - `config/topic_grouping_rules.ini`
 
+如果你想直接用一个示例覆盖文件启动，可以运行：  
+If you want to launch directly with an example override file, run:
+
+```bash
+./scripts/run_rviz_with_rules.sh
+```
+
+或者显式指定某个规则文件：  
+Or explicitly choose a rules file:
+
+```bash
+./scripts/run_rviz_with_rules.sh "/absolute/path/to/topic_grouping_rules.ini"
+```
+
 ## 9. 当前最短路径 | Shortest Current Path
 
 如果你只想最快看到效果，当前最短流程就是：  
@@ -198,4 +212,12 @@ cd "/Users/young/Documents/metropolia/26spring/multidisciplinary/rivz开发"
 ```bash
 cd "/Users/young/Documents/metropolia/26spring/multidisciplinary/rivz开发"
 ./scripts/check_demo_topics.sh
+```
+
+如果你要验证自定义规则覆盖，终端 2 可改成：  
+If you want to validate custom rule overrides, Terminal 2 can instead be:
+
+```bash
+cd "/Users/young/Documents/metropolia/26spring/multidisciplinary/rivz开发"
+./scripts/run_rviz_with_rules.sh
 ```

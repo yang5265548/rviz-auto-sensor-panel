@@ -47,6 +47,10 @@ add_library(${PROJECT_NAME} SHARED
   src/topic_scanner.cpp
 )
 
+target_compile_definitions(${PROJECT_NAME} PRIVATE
+  RVIZ_AUTO_SENSOR_PANEL_SOURCE_DIR="${CMAKE_CURRENT_SOURCE_DIR}"
+)
+
 target_include_directories(${PROJECT_NAME} PUBLIC
   $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>
   $<INSTALL_INTERFACE:include>
@@ -126,6 +130,9 @@ if(BUILD_TESTING)
       sensor_msgs
       tf2_ros
     )
+    target_compile_definitions(sensor_classifier_test PRIVATE
+      RVIZ_AUTO_SENSOR_PANEL_SOURCE_DIR="${CMAKE_CURRENT_SOURCE_DIR}"
+    )
   endif()
 
   ament_add_gtest(sensor_catalog_test
@@ -145,6 +152,9 @@ if(BUILD_TESTING)
       rclcpp
       sensor_msgs
       tf2_ros
+    )
+    target_compile_definitions(sensor_catalog_test PRIVATE
+      RVIZ_AUTO_SENSOR_PANEL_SOURCE_DIR="${CMAKE_CURRENT_SOURCE_DIR}"
     )
   endif()
 

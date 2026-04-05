@@ -490,19 +490,37 @@ void SensorTreePanel::updateStatusLabel()
 
 void SensorTreePanel::syncEnabledTopicsFromTree()
 {
-  const auto previously_enabled_topics = persisted_enabled_topics_;
   persisted_enabled_topics_.clear();
 
-  const auto groups = sensor_catalog_.groupedTopics();
-  for (const auto & [_, device_groups] : groups) {
-    for (const auto & device_group : device_groups) {
-      for (const auto & topic : device_group.topics) {
-        if (display_registry_.isEnabled(topic.name) ||
-          previously_enabled_topics.count(topic.name) > 0)
-        {
-          persisted_enabled_topics_.insert(topic.name);
-        }
+  if (!tree_widget_) {
+    return;
+  }
+
+  std::vector<QTreeWidgetItem *> pending_items;
+  for (int index = 0; index < tree_widget_->topLevelItemCount(); ++index) {
+    if (auto * item = tree_widget_->topLevelItem(index)) {
+      pending_items.push_back(item);
+    }
+  }
+
+  while (!pending_items.empty()) {
+    auto * item = pending_items.back();
+    pending_items.pop_back();
+    if (!item) {
+      continue;
+    }
+
+    const auto item_type = static_cast<TreeItemType>(
+      item->data(kNameColumn, kTreeItemTypeRole).toInt());
+    if (item_type == TreeItemType::Topic && item->checkState(kNameColumn) == Qt::Checked) {
+      const auto topic_name = item->data(kNameColumn, Qt::UserRole).toString().toStdString();
+      if (!topic_name.empty()) {
+        persisted_enabled_topics_.insert(topic_name);
       }
+    }
+
+    for (int child_index = 0; child_index < item->childCount(); ++child_index) {
+      pending_items.push_back(item->child(child_index));
     }
   }
 }

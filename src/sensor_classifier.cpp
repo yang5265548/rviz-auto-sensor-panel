@@ -5,6 +5,7 @@
 #include <algorithm>
 #include <cctype>
 #include <cstdlib>
+#include <filesystem>
 #include <fstream>
 #include <functional>
 #include <map>
@@ -27,6 +28,16 @@ constexpr char kLaserScanDisplayType[] = "rviz_default_plugins/LaserScan";
 constexpr char kImageDisplayType[] = "rviz_default_plugins/Image";
 constexpr char kPointCloud2DisplayType[] = "rviz_default_plugins/PointCloud2";
 constexpr char kRulesEnvVar[] = "RVIZ_AUTO_SENSOR_PANEL_RULES_FILE";
+
+std::string sourceTreeRulesPath()
+{
+#ifdef RVIZ_AUTO_SENSOR_PANEL_SOURCE_DIR
+  return (std::filesystem::path(RVIZ_AUTO_SENSOR_PANEL_SOURCE_DIR) / "config" /
+         "topic_grouping_rules.ini").string();
+#else
+  return "";
+#endif
+}
 
 std::string toLowerCopy(const std::string & value)
 {
@@ -172,8 +183,8 @@ GroupingRules loadGroupingRules()
     const auto package_share =
       ament_index_cpp::get_package_share_directory("rviz_auto_sensor_panel");
     loadRulesOverrides(package_share + "/config/topic_grouping_rules.ini", &rules);
-  } catch (const std::runtime_error &) {
-    // Keep built-in defaults when the package share directory is unavailable.
+  } catch (const std::exception &) {
+    loadRulesOverrides(sourceTreeRulesPath(), &rules);
   }
 
   return rules;
