@@ -31,6 +31,8 @@ The project does not yet ship as a system-wide binary package.
   `rviz2` runs on the machine
 - 已克隆本仓库  
   This repository has been cloned
+- Linux 上建议确保已安装 `python3-pip`，或者至少安装 `python3-catkin-pkg`  
+  On Linux, it is recommended to have `python3-pip` installed, or at minimum `python3-catkin-pkg`
 
 如果你的 ROS 2 不在默认位置，先设置：  
 If your ROS 2 install is not in a default location, set this first:

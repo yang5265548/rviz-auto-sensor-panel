@@ -15,4 +15,12 @@ if [[ -x "${ROOT_DIR}/install/lib/rviz_auto_sensor_panel/demo_sensor_publisher" 
   exec "${ROOT_DIR}/install/lib/rviz_auto_sensor_panel/demo_sensor_publisher"
 fi
 
-exec "${ROOT_DIR}/build/demo_sensor_publisher"
+if [[ -x "${ROOT_DIR}/build/demo_sensor_publisher" ]]; then
+  exec "${ROOT_DIR}/build/demo_sensor_publisher"
+fi
+
+echo "demo_sensor_publisher was not found in either:"
+echo "  ${ROOT_DIR}/install/lib/rviz_auto_sensor_panel/demo_sensor_publisher"
+echo "  ${ROOT_DIR}/build/demo_sensor_publisher"
+echo "Run ./scripts/install_user_local.sh or ./scripts/rebuild_install_local.sh first."
+exit 1
