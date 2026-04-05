@@ -11,10 +11,7 @@ This document provides the most direct local startup path for the current projec
 Run these from the project root:
 
 ```bash
-python3 -m pip install --target ./vendor -r requirements-dev.txt
-./scripts/configure_local.sh
-./scripts/build_local.sh
-./scripts/install_local.sh
+./scripts/rebuild_install_local.sh
 ```
 
 ## 3. 启动演示数据 | Start Demo Topics
@@ -34,6 +31,13 @@ This process continuously publishes these demo topics:
 - `/demo/camera/left/image_raw`
 - `/demo/camera/right/image_raw`
 - `/demo/lidar/points`
+
+如果你想先确认数据已经起来，可以在第三个终端执行：  
+If you want to confirm the data is up first, run this in a third terminal:
+
+```bash
+./scripts/check_demo_topics.sh
+```
 
 ## 4. 启动 RViz | Start RViz
 
@@ -120,10 +124,7 @@ Check these in order:
 If you just want the fastest path to seeing it work, the shortest current flow is:
 
 ```bash
-python3 -m pip install --target ./vendor -r requirements-dev.txt
-./scripts/configure_local.sh
-./scripts/build_local.sh
-./scripts/install_local.sh
+./scripts/rebuild_install_local.sh
 ```
 
 终端 1：  
@@ -138,4 +139,38 @@ Terminal 2:
 
 ```bash
 ./scripts/run_rviz_local.sh
+```
+
+终端 3，可选检查：  
+Terminal 3, optional verification:
+
+```bash
+./scripts/check_demo_topics.sh
+```
+
+## 9. 可直接复制的验证命令 | Copy-Paste Validation Commands
+
+如果你需要我帮你验证时，这一组命令就是之后默认可复制的标准流程：  
+When I ask you to validate in future, this is the default copy-paste flow I will refer to:
+
+终端 1：
+
+```bash
+cd "/Users/young/Documents/metropolia/26spring/multidisciplinary/rivz开发"
+./scripts/rebuild_install_local.sh
+./scripts/run_demo_publisher.sh
+```
+
+终端 2：
+
+```bash
+cd "/Users/young/Documents/metropolia/26spring/multidisciplinary/rivz开发"
+./scripts/run_rviz_local.sh
+```
+
+终端 3：
+
+```bash
+cd "/Users/young/Documents/metropolia/26spring/multidisciplinary/rivz开发"
+./scripts/check_demo_topics.sh
 ```
