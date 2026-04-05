@@ -11,6 +11,7 @@ set(CMAKE_AUTOMOC ON)
 find_package(ament_cmake REQUIRED)
 find_package(pluginlib REQUIRED)
 find_package(rclcpp REQUIRED)
+find_package(sensor_msgs REQUIRED)
 
 if(APPLE AND EXISTS "/opt/homebrew/opt/qt@5")
   list(APPEND CMAKE_PREFIX_PATH "/opt/homebrew/opt/qt@5")
@@ -48,6 +49,7 @@ target_include_directories(${PROJECT_NAME} PUBLIC
 
 ament_target_dependencies(${PROJECT_NAME}
   rclcpp
+  sensor_msgs
 )
 
 target_link_libraries(${PROJECT_NAME}
@@ -58,10 +60,28 @@ target_link_libraries(${PROJECT_NAME}
 
 pluginlib_export_plugin_description_file(rviz_common rviz_common_plugins.xml)
 
+add_executable(demo_sensor_publisher
+  src/demo_sensor_publisher.cpp
+)
+
+target_include_directories(demo_sensor_publisher PUBLIC
+  $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>
+  $<INSTALL_INTERFACE:include>
+)
+
+ament_target_dependencies(demo_sensor_publisher
+  rclcpp
+  sensor_msgs
+)
+
 install(TARGETS ${PROJECT_NAME}
   ARCHIVE DESTINATION lib
   LIBRARY DESTINATION lib
   RUNTIME DESTINATION bin
+)
+
+install(TARGETS demo_sensor_publisher
+  RUNTIME DESTINATION lib/${PROJECT_NAME}
 )
 
 install(DIRECTORY include/
@@ -87,6 +107,7 @@ if(BUILD_TESTING)
     )
     ament_target_dependencies(sensor_classifier_test
       rclcpp
+      sensor_msgs
     )
   endif()
 
@@ -103,6 +124,7 @@ if(BUILD_TESTING)
     )
     ament_target_dependencies(sensor_catalog_test
       rclcpp
+      sensor_msgs
     )
   endif()
 
@@ -118,6 +140,7 @@ if(BUILD_TESTING)
     )
     ament_target_dependencies(display_registry_test
       rclcpp
+      sensor_msgs
     )
     target_link_libraries(display_registry_test
       rviz_common::rviz_common

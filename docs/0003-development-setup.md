@@ -43,6 +43,15 @@ Recommended: use the repository scripts:
 ```bash
 ./scripts/configure_local.sh
 ./scripts/build_local.sh
+./scripts/install_local.sh
+```
+
+运行时推荐使用：  
+Recommended runtime scripts:
+
+```bash
+./scripts/run_demo_publisher.sh
+./scripts/run_rviz_local.sh
 ```
 
 这些脚本会自动为当前项目设置需要的 `PYTHONPATH`。  

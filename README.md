@@ -53,6 +53,7 @@ Requirements baseline:
 - [Architecture / 架构设计](./docs/0002-rviz-auto-sensor-panel-architecture.md)
 - [Development Setup / 开发环境](./docs/0003-development-setup.md)
 - [RViz Manual Validation / 手工验证](./docs/0004-rviz-manual-validation.md)
+- [Quick Start / 快速启动](./docs/0005-quick-start.md)
 
 ## 计划目录 | Planned Structure
 

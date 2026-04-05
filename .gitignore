@@ -13,6 +13,7 @@ install/
 log/
 dist/
 vendor/
+.roslog/
 
 # CMake
 CMakeCache.txt
