@@ -45,9 +45,12 @@ If you want to confirm the data is up first, run this in a third terminal:
 Open a second terminal, source ROS 2, and make sure RViz can discover the local install.
 
 说明：当前仓库使用的是 package 级安装结果，因此脚本会加载  
-`install/share/rviz_auto_sensor_panel/local_setup.sh`。  
-Note: this repository currently uses package-level install output, so the script loads  
-`install/share/rviz_auto_sensor_panel/local_setup.sh`.
+本地 `install/` 前缀到 `AMENT_PREFIX_PATH` 与 `CMAKE_PREFIX_PATH`。  
+Note: the startup script injects the local `install/` prefix into  
+`AMENT_PREFIX_PATH` and `CMAKE_PREFIX_PATH`.
+
+这样可以让 RViz 发现本地插件，同时避免破坏系统里默认 RViz plugins 的动态库加载。  
+This allows RViz to discover the local plugin while avoiding interference with the dynamic library loading of the default RViz plugins.
 
 建议顺序：  
 Suggested order:

@@ -121,10 +121,17 @@ void SensorTreePanel::save(rviz_common::Config config) const
 
 void SensorTreePanel::refreshTopics()
 {
+  std::set<std::string> known_topics;
+  for (const auto & topic : sensor_catalog_.allTopics()) {
+    known_topics.insert(topic.name);
+  }
+
   const auto latest_topics = topic_scanner_.scan(node_);
   if (auto_enable_new_topics_) {
     for (const auto & topic : latest_topics) {
-      persisted_enabled_topics_.insert(topic.name);
+      if (known_topics.count(topic.name) == 0) {
+        persisted_enabled_topics_.insert(topic.name);
+      }
     }
   }
 
@@ -257,10 +264,6 @@ void SensorTreePanel::handleAutoEnableToggled(bool checked)
 {
   auto_enable_new_topics_ = checked;
   Q_EMIT configChanged();
-
-  if (checked) {
-    setAllTopicsEnabled(true);
-  }
 }
 
 void SensorTreePanel::rebuildTree()
