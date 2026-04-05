@@ -9,6 +9,7 @@ set(CMAKE_CXX_STANDARD_REQUIRED ON)
 set(CMAKE_AUTOMOC ON)
 
 find_package(ament_cmake REQUIRED)
+find_package(ament_index_cpp REQUIRED)
 find_package(pluginlib REQUIRED)
 find_package(geometry_msgs REQUIRED)
 find_package(rclcpp REQUIRED)
@@ -52,6 +53,7 @@ target_include_directories(${PROJECT_NAME} PUBLIC
 )
 
 ament_target_dependencies(${PROJECT_NAME}
+  ament_index_cpp
   geometry_msgs
   rclcpp
   sensor_msgs
@@ -100,6 +102,10 @@ install(FILES rviz_common_plugins.xml
   DESTINATION share/${PROJECT_NAME}
 )
 
+install(DIRECTORY config/
+  DESTINATION share/${PROJECT_NAME}/config
+)
+
 if(BUILD_TESTING)
   find_package(ament_cmake_gtest REQUIRED)
 
@@ -114,6 +120,7 @@ if(BUILD_TESTING)
       $<INSTALL_INTERFACE:include>
     )
     ament_target_dependencies(sensor_classifier_test
+      ament_index_cpp
       geometry_msgs
       rclcpp
       sensor_msgs
@@ -133,6 +140,7 @@ if(BUILD_TESTING)
       $<INSTALL_INTERFACE:include>
     )
     ament_target_dependencies(sensor_catalog_test
+      ament_index_cpp
       geometry_msgs
       rclcpp
       sensor_msgs
@@ -151,6 +159,7 @@ if(BUILD_TESTING)
       $<INSTALL_INTERFACE:include>
     )
     ament_target_dependencies(display_registry_test
+      ament_index_cpp
       geometry_msgs
       rclcpp
       sensor_msgs
@@ -172,6 +181,7 @@ if(BUILD_TESTING)
       $<INSTALL_INTERFACE:include>
     )
     ament_target_dependencies(topic_state_logic_test
+      ament_index_cpp
       geometry_msgs
       rclcpp
       sensor_msgs

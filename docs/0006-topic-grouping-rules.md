@@ -110,7 +110,42 @@ Future versions will keep improving portability:
 - 把设备组和 frame、QoS、附属 topic 信息关联起来  
   Associate device groups with frame, QoS, and auxiliary topic information
 
-## 7. 结论 | Conclusion
+## 7. 配置文件 | Configuration File
+
+当前版本已经支持用规则文件覆盖默认分组行为。  
+The current version already supports overriding default grouping behavior with a rules file.
+
+默认安装路径：  
+Default installed path:
+
+- `share/rviz_auto_sensor_panel/config/topic_grouping_rules.ini`
+
+也可以通过环境变量覆盖：  
+You can also override it with an environment variable:
+
+- `RVIZ_AUTO_SENSOR_PANEL_RULES_FILE=/absolute/path/to/topic_grouping_rules.ini`
+
+当前支持的配置项：  
+Currently supported configuration keys:
+
+- `[grouping] ignored_leading_tokens`
+- `[grouping] direction_priority`
+- `[aliases]`
+
+例如：  
+For example:
+
+```ini
+[grouping]
+ignored_leading_tokens=demo,simulation
+direction_priority=front,left,right,rear
+
+[aliases]
+cam=camera
+pc=pointcloud
+```
+
+## 8. 结论 | Conclusion
 
 当前版本的分组不是“只针对你的电脑写死”，但也还没有达到“零配置覆盖所有 ROS 项目”的程度。  
 The current grouping is not hard-coded only for your machine, but it also has not yet reached "zero-config coverage for every ROS project."

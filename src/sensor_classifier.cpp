@@ -1,10 +1,16 @@
 #include "rviz_auto_sensor_panel/sensor_classifier.hpp"
 
+#include <ament_index_cpp/get_package_share_directory.hpp>
+
 #include <algorithm>
 #include <cctype>
+#include <cstdlib>
+#include <fstream>
 #include <functional>
+#include <map>
 #include <set>
 #include <sstream>
+#include <stdexcept>
 #include <vector>
 
 namespace rviz_auto_sensor_panel
@@ -20,6 +26,7 @@ constexpr char kPointCloud2MessageType[] = "sensor_msgs/msg/PointCloud2";
 constexpr char kLaserScanDisplayType[] = "rviz_default_plugins/LaserScan";
 constexpr char kImageDisplayType[] = "rviz_default_plugins/Image";
 constexpr char kPointCloud2DisplayType[] = "rviz_default_plugins/PointCloud2";
+constexpr char kRulesEnvVar[] = "RVIZ_AUTO_SENSOR_PANEL_RULES_FILE";
 
 std::string toLowerCopy(const std::string & value)
 {
@@ -30,7 +37,151 @@ std::string toLowerCopy(const std::string & value)
   return lowered;
 }
 
-std::vector<std::string> splitTopicTokens(const std::string & topic_name)
+std::vector<std::string> defaultDirectionPriority()
+{
+  return {
+    "front", "left", "center", "centre", "right", "rear", "back", "top", "bottom"
+  };
+}
+
+GroupingRules buildDefaultRules()
+{
+  GroupingRules rules;
+  rules.ignored_leading_tokens = {"demo", "sim", "simulator", "example", "samples"};
+  rules.token_aliases = {
+    {"cam", "camera"},
+    {"pc", "pointcloud"},
+    {"pcl", "pointcloud"}
+  };
+  rules.direction_priority = defaultDirectionPriority();
+  return rules;
+}
+
+std::string trimCopy(const std::string & value)
+{
+  const auto begin = std::find_if_not(
+    value.begin(), value.end(),
+    [](unsigned char character) {return std::isspace(character) != 0;});
+  const auto end = std::find_if_not(
+    value.rbegin(), value.rend(),
+    [](unsigned char character) {return std::isspace(character) != 0;}).base();
+
+  if (begin >= end) {
+    return "";
+  }
+
+  return std::string(begin, end);
+}
+
+std::vector<std::string> splitCommaSeparated(const std::string & value)
+{
+  std::vector<std::string> parts;
+  std::stringstream stream(value);
+  std::string part;
+  while (std::getline(stream, part, ',')) {
+    const auto trimmed = trimCopy(part);
+    if (!trimmed.empty()) {
+      parts.push_back(toLowerCopy(trimmed));
+    }
+  }
+  return parts;
+}
+
+void applyCommaSeparatedList(const std::string & value, std::set<std::string> * output)
+{
+  if (!output) {
+    return;
+  }
+
+  output->clear();
+  for (const auto & part : splitCommaSeparated(value)) {
+    output->insert(part);
+  }
+}
+
+void applyCommaSeparatedVector(const std::string & value, std::vector<std::string> * output)
+{
+  if (!output) {
+    return;
+  }
+
+  output->clear();
+  for (const auto & part : splitCommaSeparated(value)) {
+    output->push_back(part);
+  }
+}
+
+void loadRulesOverrides(const std::string & path, GroupingRules * rules)
+{
+  if (!rules) {
+    return;
+  }
+
+  std::ifstream input(path);
+  if (!input.good()) {
+    return;
+  }
+
+  std::string current_section;
+  std::string line;
+  while (std::getline(input, line)) {
+    const auto trimmed = trimCopy(line);
+    if (trimmed.empty() || trimmed[0] == '#' || trimmed[0] == ';') {
+      continue;
+    }
+
+    if (trimmed.front() == '[' && trimmed.back() == ']') {
+      current_section = toLowerCopy(trimCopy(trimmed.substr(1, trimmed.size() - 2)));
+      continue;
+    }
+
+    const auto separator = trimmed.find('=');
+    if (separator == std::string::npos) {
+      continue;
+    }
+
+    const auto key = toLowerCopy(trimCopy(trimmed.substr(0, separator)));
+    const auto value = trimCopy(trimmed.substr(separator + 1));
+
+    if (current_section == "grouping" && key == "ignored_leading_tokens") {
+      applyCommaSeparatedList(value, &rules->ignored_leading_tokens);
+      continue;
+    }
+
+    if (current_section == "grouping" && key == "direction_priority") {
+      applyCommaSeparatedVector(value, &rules->direction_priority);
+      continue;
+    }
+
+    if (current_section == "aliases" && !key.empty() && !value.empty()) {
+      rules->token_aliases[key] = toLowerCopy(value);
+    }
+  }
+}
+
+GroupingRules loadGroupingRules()
+{
+  auto rules = buildDefaultRules();
+
+  if (const char * rules_path = std::getenv(kRulesEnvVar)) {
+    loadRulesOverrides(rules_path, &rules);
+    return rules;
+  }
+
+  try {
+    const auto package_share =
+      ament_index_cpp::get_package_share_directory("rviz_auto_sensor_panel");
+    loadRulesOverrides(package_share + "/config/topic_grouping_rules.ini", &rules);
+  } catch (const std::runtime_error &) {
+    // Keep built-in defaults when the package share directory is unavailable.
+  }
+
+  return rules;
+}
+
+std::vector<std::string> splitTopicTokens(
+  const std::string & topic_name,
+  const GroupingRules & rules)
 {
   std::vector<std::string> tokens;
   std::stringstream stream(topic_name);
@@ -42,9 +193,14 @@ std::vector<std::string> splitTopicTokens(const std::string & topic_name)
     }
 
     std::string current_word;
-    auto flush_word = [&tokens, &current_word]() {
+    auto flush_word = [&tokens, &current_word, &rules]() {
         if (!current_word.empty()) {
-          tokens.push_back(toLowerCopy(current_word));
+          auto lowered = toLowerCopy(current_word);
+          const auto alias = rules.token_aliases.find(lowered);
+          if (alias != rules.token_aliases.end()) {
+            lowered = alias->second;
+          }
+          tokens.push_back(lowered);
           current_word.clear();
         }
       };
@@ -190,20 +346,17 @@ std::vector<std::string> directionWords()
   };
 }
 
-bool isDirectionWord(const std::string & token)
+bool isDirectionWord(const std::string & token, const GroupingRules & rules)
 {
-  const auto directions = directionWords();
+  const auto directions = rules.direction_priority.empty() ?
+    defaultDirectionPriority() : rules.direction_priority;
   return std::find(directions.begin(), directions.end(), token) != directions.end();
-}
-
-std::set<std::string> leadingContextWords()
-{
-  return {"demo", "sim", "simulator", "example", "samples"};
 }
 
 std::vector<std::string> deriveIdentityTokens(
   const std::vector<std::string> & topic_tokens,
-  SensorCategory category)
+  SensorCategory category,
+  const GroupingRules & rules)
 {
   auto identity_tokens = topic_tokens;
   const auto suffixes = genericSuffixesFor(category);
@@ -222,15 +375,20 @@ std::vector<std::string> deriveIdentityTokens(
     compact_tokens.push_back(token);
   }
 
-  const auto context_words = leadingContextWords();
-  while (!compact_tokens.empty() && contains(context_words, compact_tokens.front())) {
+  while (
+    !compact_tokens.empty() &&
+    contains(rules.ignored_leading_tokens, compact_tokens.front()))
+  {
     compact_tokens.erase(compact_tokens.begin());
   }
 
   return compact_tokens;
 }
 
-TopicProfile buildTopicProfile(const std::string & topic_name, SensorCategory category)
+TopicProfile buildTopicProfile(
+  const std::string & topic_name,
+  SensorCategory category,
+  const GroupingRules & rules)
 {
   TopicProfile profile;
   profile.category = category;
@@ -242,14 +400,14 @@ TopicProfile buildTopicProfile(const std::string & topic_name, SensorCategory ca
     return profile;
   }
 
-  const auto topic_tokens = splitTopicTokens(topic_name);
-  const auto identity_tokens = deriveIdentityTokens(topic_tokens, category);
+  const auto topic_tokens = splitTopicTokens(topic_name, rules);
+  const auto identity_tokens = deriveIdentityTokens(topic_tokens, category, rules);
 
   std::vector<std::string> label_tokens;
   std::vector<std::string> key_tokens;
 
   for (const auto & token : identity_tokens) {
-    if (isDirectionWord(token)) {
+    if (isDirectionWord(token, rules)) {
       label_tokens.push_back(token);
       key_tokens.push_back(token);
       continue;
@@ -275,6 +433,11 @@ TopicProfile buildTopicProfile(const std::string & topic_name, SensorCategory ca
 
 }  // namespace
 
+SensorClassifier::SensorClassifier()
+: rules_(loadGroupingRules())
+{
+}
+
 SensorCategory SensorClassifier::classifyMessageType(const std::string & message_type) const
 {
   if (message_type == kLaserScanMessageType) {
@@ -296,7 +459,7 @@ TopicProfile SensorClassifier::classifyTopic(
   const std::string & topic_name,
   const std::string & message_type) const
 {
-  return buildTopicProfile(topic_name, classifyMessageType(message_type));
+  return buildTopicProfile(topic_name, classifyMessageType(message_type), rules_);
 }
 
 bool SensorClassifier::isSupportedMessageType(const std::string & message_type) const
@@ -319,6 +482,11 @@ std::string SensorClassifier::lookupDisplayType(const std::string & message_type
   }
 
   return "";
+}
+
+const GroupingRules & SensorClassifier::rules() const
+{
+  return rules_;
 }
 
 std::string toString(SensorCategory category)

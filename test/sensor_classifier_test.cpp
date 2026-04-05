@@ -86,4 +86,12 @@ TEST(SensorClassifierTest, ignoresLeadingDemoContextInGroupLabels)
   EXPECT_EQ(demo_lidar.group_label, "Front Lidar");
 }
 
+TEST(SensorClassifierTest, exposesLoadedGroupingRules)
+{
+  SensorClassifier classifier;
+
+  EXPECT_TRUE(classifier.rules().ignored_leading_tokens.count("demo") > 0);
+  EXPECT_EQ(classifier.rules().token_aliases.at("cam"), "camera");
+}
+
 }  // namespace rviz_auto_sensor_panel

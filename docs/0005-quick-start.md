@@ -129,7 +129,21 @@ Check these in order:
 3. `rviz_common_plugins.xml` 是否已安装到 `install/share/rviz_auto_sensor_panel/`  
    Whether `rviz_common_plugins.xml` was installed to `install/share/rviz_auto_sensor_panel/`
 
-## 8. 当前最短路径 | Shortest Current Path
+## 8. 自定义分组规则 | Custom Grouping Rules
+
+如果你想覆盖默认的 topic 分组规则，可以设置环境变量：  
+If you want to override the default topic-grouping rules, you can set this environment variable:
+
+```bash
+export RVIZ_AUTO_SENSOR_PANEL_RULES_FILE="/absolute/path/to/topic_grouping_rules.ini"
+```
+
+默认规则文件样例在这里：  
+The default rules example is here:
+
+- `config/topic_grouping_rules.ini`
+
+## 9. 当前最短路径 | Shortest Current Path
 
 如果你只想最快看到效果，当前最短流程就是：  
 If you just want the fastest path to seeing it work, the shortest current flow is:
@@ -159,7 +173,7 @@ Terminal 3, optional verification:
 ./scripts/check_demo_topics.sh
 ```
 
-## 9. 可直接复制的验证命令 | Copy-Paste Validation Commands
+## 10. 可直接复制的验证命令 | Copy-Paste Validation Commands
 
 如果你需要我帮你验证时，这一组命令就是之后默认可复制的标准流程：  
 When I ask you to validate in future, this is the default copy-paste flow I will refer to:

@@ -56,6 +56,11 @@ Requirements baseline:
 - [Quick Start / 快速启动](./docs/0005-quick-start.md)
 - [Topic Grouping Rules / Topic 分组规则](./docs/0006-topic-grouping-rules.md)
 
+默认规则配置文件：  
+Default rules configuration file:
+
+- `config/topic_grouping_rules.ini`
+
 ## 计划目录 | Planned Structure
 
 - `docs/`：产品、架构与设计文档  
