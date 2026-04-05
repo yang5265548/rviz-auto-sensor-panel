@@ -103,6 +103,9 @@ Then you only need to:
 2. 观察 RViz 左侧 `Displays` 是否自动出现 `[Auto] ...` 项  
    Verify that `[Auto] ...` displays appear automatically in the RViz `Displays` panel
 
+你还可以直接用面板顶部的搜索框筛选 topic，并通过 `Show offline` 控制是否显示当前离线但已记住的项。  
+You can also use the top search box to filter topics directly and use `Show offline` to control whether currently offline remembered items remain visible.
+
 ## 8. 自定义分组规则 | Custom Grouping Rules
 
 如果你的 topic 命名风格和默认规则不一致，可以用自定义规则文件启动：  

@@ -8,7 +8,9 @@
 
 #include <QCheckBox>
 #include <QLabel>
+#include <QLineEdit>
 #include <QPushButton>
+#include <QString>
 #include <QTimer>
 #include <QTreeWidget>
 
@@ -43,13 +45,14 @@ private Q_SLOTS:
   void handleEnableAllClicked();
   void handleDisableAllClicked();
   void handleAutoEnableToggled(bool checked);
+  void handleShowOfflineToggled(bool checked);
+  void handleFilterTextChanged(const QString & text);
 
 private:
   void buildUi();
   void rebuildTree();
   void updateStatusLabel();
   void syncEnabledTopicsFromDisplays();
-  void syncEnabledTopicsFromTree();
   void reconcileDesiredDisplays();
   void setAllTopicsEnabled(bool enabled);
   void setDescendantTopicsEnabled(QTreeWidgetItem * root_item, bool enabled);
@@ -61,13 +64,16 @@ private:
   Qt::CheckState determineAggregateCheckState(const QTreeWidgetItem * item) const;
   bool shouldTopicStartEnabled(const std::string & topic_name) const;
   bool shouldGroupStartExpanded(const std::string & group_key) const;
+  bool shouldShowTopic(const DiscoveredTopic & topic) const;
   void rememberGroupExpansionStates();
 
   QLabel * status_label_;
+  QLineEdit * filter_input_;
   QPushButton * refresh_button_;
   QPushButton * enable_all_button_;
   QPushButton * disable_all_button_;
   QCheckBox * auto_enable_checkbox_;
+  QCheckBox * show_offline_checkbox_;
   QTreeWidget * tree_widget_;
   QTimer * refresh_timer_;
 
@@ -82,6 +88,8 @@ private:
   std::set<std::string> suppressed_auto_enable_topics_;
   std::map<std::string, bool> persisted_group_expansion_;
   bool auto_enable_new_topics_;
+  bool show_offline_topics_;
+  QString filter_text_;
 };
 
 }  // namespace rviz_auto_sensor_panel

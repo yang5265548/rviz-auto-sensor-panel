@@ -4,6 +4,7 @@
 
 #include <QHBoxLayout>
 #include <QHeaderView>
+#include <QLineEdit>
 #include <QSignalBlocker>
 #include <QString>
 #include <QVBoxLayout>
@@ -29,6 +30,8 @@ constexpr char kTopicNameKey[] = "TopicName";
 constexpr char kGroupKey[] = "GroupKey";
 constexpr char kExpandedKey[] = "Expanded";
 constexpr char kAutoEnableNewTopicsKey[] = "AutoEnableNewTopics";
+constexpr char kShowOfflineTopicsKey[] = "ShowOfflineTopics";
+constexpr char kFilterTextKey[] = "FilterText";
 constexpr int kTreeItemTypeRole = Qt::UserRole + 10;
 constexpr int kTreeItemGroupKeyRole = Qt::UserRole + 11;
 
@@ -55,14 +58,17 @@ QString publisherSummary(const DiscoveredTopic & topic)
 SensorTreePanel::SensorTreePanel(QWidget * parent)
 : rviz_common::Panel(parent),
   status_label_(nullptr),
+  filter_input_(nullptr),
   refresh_button_(nullptr),
   enable_all_button_(nullptr),
   disable_all_button_(nullptr),
   auto_enable_checkbox_(nullptr),
+  show_offline_checkbox_(nullptr),
   tree_widget_(nullptr),
   refresh_timer_(nullptr),
   topic_scanner_(SensorClassifier()),
-  auto_enable_new_topics_(true)
+  auto_enable_new_topics_(true),
+  show_offline_topics_(true)
 {
   buildUi();
 }
@@ -126,6 +132,19 @@ void SensorTreePanel::load(const rviz_common::Config & config)
     auto_enable_checkbox_->setChecked(auto_enable_new_topics_);
   }
 
+  config.mapGetBool(kShowOfflineTopicsKey, &show_offline_topics_);
+  if (show_offline_checkbox_) {
+    show_offline_checkbox_->setChecked(show_offline_topics_);
+  }
+
+  QString filter_text;
+  if (config.mapGetString(kFilterTextKey, &filter_text)) {
+    filter_text_ = filter_text;
+  }
+  if (filter_input_) {
+    filter_input_->setText(filter_text_);
+  }
+
   rebuildTree();
   updateStatusLabel();
 }
@@ -154,6 +173,8 @@ void SensorTreePanel::save(rviz_common::Config config) const
   }
 
   config.mapSetValue(kAutoEnableNewTopicsKey, auto_enable_new_topics_);
+  config.mapSetValue(kShowOfflineTopicsKey, show_offline_topics_);
+  config.mapSetValue(kFilterTextKey, filter_text_);
 }
 
 void SensorTreePanel::refreshTopics()
@@ -178,6 +199,22 @@ void SensorTreePanel::refreshTopics()
   rebuildTree();
   reconcileDesiredDisplays();
   updateStatusLabel();
+}
+
+void SensorTreePanel::handleShowOfflineToggled(bool checked)
+{
+  show_offline_topics_ = checked;
+  rebuildTree();
+  updateStatusLabel();
+  Q_EMIT configChanged();
+}
+
+void SensorTreePanel::handleFilterTextChanged(const QString & text)
+{
+  filter_text_ = text;
+  rebuildTree();
+  updateStatusLabel();
+  Q_EMIT configChanged();
 }
 
 void SensorTreePanel::syncEnabledTopicsFromDisplays()
@@ -343,14 +380,18 @@ void SensorTreePanel::buildUi()
   layout->setSpacing(4);
 
   status_label_ = new QLabel("No supported topics discovered yet.");
+  filter_input_ = new QLineEdit();
   refresh_button_ = new QPushButton("Refresh");
   enable_all_button_ = new QPushButton("Enable All");
   disable_all_button_ = new QPushButton("Disable All");
   auto_enable_checkbox_ = new QCheckBox("Auto-enable new topics");
+  show_offline_checkbox_ = new QCheckBox("Show offline");
   tree_widget_ = new QTreeWidget();
   refresh_timer_ = new QTimer(this);
 
   auto_enable_checkbox_->setChecked(auto_enable_new_topics_);
+  show_offline_checkbox_->setChecked(show_offline_topics_);
+  filter_input_->setPlaceholderText("Filter topics, groups, or message types");
 
   tree_widget_->setColumnCount(kTreeColumnCount);
   tree_widget_->setHeaderLabels(QStringList() << "Sensor / Topic" << "State");
@@ -369,12 +410,14 @@ void SensorTreePanel::buildUi()
   auto * controls_layout = new QHBoxLayout();
   controls_layout->setContentsMargins(0, 0, 0, 0);
   controls_layout->addWidget(auto_enable_checkbox_);
+  controls_layout->addWidget(show_offline_checkbox_);
   controls_layout->addStretch();
   controls_layout->addWidget(enable_all_button_);
   controls_layout->addWidget(disable_all_button_);
   controls_layout->addWidget(refresh_button_);
 
   layout->addLayout(status_layout);
+  layout->addWidget(filter_input_);
   layout->addLayout(controls_layout);
   layout->addWidget(tree_widget_);
 
@@ -382,6 +425,8 @@ void SensorTreePanel::buildUi()
   QObject::connect(enable_all_button_, &QPushButton::clicked, this, &SensorTreePanel::handleEnableAllClicked);
   QObject::connect(disable_all_button_, &QPushButton::clicked, this, &SensorTreePanel::handleDisableAllClicked);
   QObject::connect(auto_enable_checkbox_, &QCheckBox::toggled, this, &SensorTreePanel::handleAutoEnableToggled);
+  QObject::connect(show_offline_checkbox_, &QCheckBox::toggled, this, &SensorTreePanel::handleShowOfflineToggled);
+  QObject::connect(filter_input_, &QLineEdit::textChanged, this, &SensorTreePanel::handleFilterTextChanged);
   QObject::connect(refresh_timer_, &QTimer::timeout, this, &SensorTreePanel::refreshTopics);
   QObject::connect(
     tree_widget_, &QTreeWidget::itemChanged, this, &SensorTreePanel::handleTreeItemChanged);
@@ -419,23 +464,45 @@ void SensorTreePanel::rebuildTree()
   const auto groups = sensor_catalog_.groupedTopics();
 
   for (const auto category : supportedCategories()) {
-    auto * category_item = new QTreeWidgetItem(tree_widget_);
-    category_item->setText(kNameColumn, QString::fromStdString(toString(category)));
-    category_item->setText(kStateColumn, "Category");
-    category_item->setFlags(category_item->flags() | Qt::ItemIsUserCheckable);
-    category_item->setData(
-      kNameColumn, kTreeItemTypeRole, static_cast<int>(TreeItemType::Category));
-    category_item->setData(
-      kNameColumn, kTreeItemGroupKeyRole, QString::fromStdString(toString(category)));
-
     const auto group = groups.find(category);
     if (group == groups.end()) {
-      category_item->setExpanded(shouldGroupStartExpanded(toString(category)));
       continue;
     }
 
+    QTreeWidgetItem * category_item = nullptr;
     int available_in_category = 0;
+    int total_in_category = 0;
     for (const auto & device_group : group->second) {
+      std::vector<const DiscoveredTopic *> visible_topics;
+      int available_in_group = 0;
+      for (const auto & topic : device_group.topics) {
+        if (!shouldShowTopic(topic)) {
+          continue;
+        }
+
+        visible_topics.push_back(&topic);
+        ++total_in_category;
+        if (topic.is_available) {
+          ++available_in_group;
+          ++available_in_category;
+        }
+      }
+
+      if (visible_topics.empty()) {
+        continue;
+      }
+
+      if (!category_item) {
+        category_item = new QTreeWidgetItem(tree_widget_);
+        category_item->setText(kNameColumn, QString::fromStdString(toString(category)));
+        category_item->setText(kStateColumn, "Category");
+        category_item->setFlags(category_item->flags() | Qt::ItemIsUserCheckable);
+        category_item->setData(
+          kNameColumn, kTreeItemTypeRole, static_cast<int>(TreeItemType::Category));
+        category_item->setData(
+          kNameColumn, kTreeItemGroupKeyRole, QString::fromStdString(toString(category)));
+      }
+
       auto * group_item = new QTreeWidgetItem(category_item);
       group_item->setText(kNameColumn, QString::fromStdString(device_group.label));
       group_item->setFlags(group_item->flags() | Qt::ItemIsUserCheckable);
@@ -444,70 +511,61 @@ void SensorTreePanel::rebuildTree()
       group_item->setData(
         kNameColumn, kTreeItemGroupKeyRole, QString::fromStdString(device_group.key));
 
-      int available_in_group = 0;
-      for (const auto & topic : device_group.topics) {
+      for (const auto * topic : visible_topics) {
         auto * topic_item = new QTreeWidgetItem(group_item);
         topic_item->setFlags(topic_item->flags() | Qt::ItemIsUserCheckable);
         topic_item->setText(
           kNameColumn,
-          QString::fromStdString(topic.topic_label + (topic.is_available ? "" : " (offline)")));
-        topic_item->setText(kStateColumn, publisherSummary(topic));
-        topic_item->setData(kNameColumn, Qt::UserRole, QString::fromStdString(topic.name));
-        topic_item->setData(kNameColumn, Qt::UserRole + 1, QString::fromStdString(topic.message_type));
+          QString::fromStdString(topic->topic_label + (topic->is_available ? "" : " (offline)")));
+        topic_item->setText(kStateColumn, publisherSummary(*topic));
+        topic_item->setData(kNameColumn, Qt::UserRole, QString::fromStdString(topic->name));
+        topic_item->setData(kNameColumn, Qt::UserRole + 1, QString::fromStdString(topic->message_type));
         topic_item->setData(
           kNameColumn, kTreeItemTypeRole, static_cast<int>(TreeItemType::Topic));
         topic_item->setToolTip(
           kNameColumn,
           QString("Topic: %1\nType: %2\nPublishers: %3")
-          .arg(QString::fromStdString(topic.name))
-          .arg(QString::fromStdString(topic.message_type))
-          .arg(static_cast<qulonglong>(topic.publisher_count)));
+          .arg(QString::fromStdString(topic->name))
+          .arg(QString::fromStdString(topic->message_type))
+          .arg(static_cast<qulonglong>(topic->publisher_count)));
         topic_item->setCheckState(
           kNameColumn,
-          shouldTopicStartEnabled(topic.name) ? Qt::Checked : Qt::Unchecked);
-
-        if (topic.is_available) {
-          ++available_in_group;
-          ++available_in_category;
-        }
+          shouldTopicStartEnabled(topic->name) ? Qt::Checked : Qt::Unchecked);
       }
 
       group_item->setText(
         kStateColumn,
         QString("%1 total / %2 available")
-        .arg(static_cast<int>(device_group.topics.size()))
+        .arg(static_cast<int>(visible_topics.size()))
         .arg(available_in_group));
       group_item->setToolTip(
         kNameColumn,
         QString("Device group: %1\nTopics: %2\nAvailable: %3")
         .arg(QString::fromStdString(device_group.label))
-        .arg(static_cast<int>(device_group.topics.size()))
+        .arg(static_cast<int>(visible_topics.size()))
         .arg(available_in_group));
       group_item->setCheckState(kNameColumn, determineAggregateCheckState(group_item));
       group_item->setExpanded(shouldGroupStartExpanded(device_group.key));
     }
 
+    if (!category_item) {
+      continue;
+    }
+
     category_item->setText(
       kStateColumn,
       QString("%1 total / %2 available")
-      .arg([&group]() {
-        int total = 0;
-        for (const auto & device_group : group->second) {
-          total += static_cast<int>(device_group.topics.size());
-        }
-        return total;
-      }())
+      .arg(total_in_category)
       .arg(available_in_category));
     category_item->setToolTip(
       kNameColumn,
-      QString("Sensor category: %1\nAvailable topics: %2")
+      QString("Sensor category: %1\nVisible topics: %2\nAvailable topics: %3")
       .arg(QString::fromStdString(toString(category)))
+      .arg(total_in_category)
       .arg(available_in_category));
     category_item->setCheckState(kNameColumn, determineAggregateCheckState(category_item));
     category_item->setExpanded(shouldGroupStartExpanded(toString(category)));
   }
-
-  syncEnabledTopicsFromTree();
 }
 
 void SensorTreePanel::updateStatusLabel()
@@ -516,9 +574,13 @@ void SensorTreePanel::updateStatusLabel()
 
   std::size_t available_count = 0;
   std::size_t enabled_count = 0;
+  std::size_t visible_count = 0;
   for (const auto & topic : topics) {
     if (topic.is_available) {
       ++available_count;
+    }
+    if (shouldShowTopic(topic)) {
+      ++visible_count;
     }
     if (display_registry_.isEnabled(topic.name)) {
       ++enabled_count;
@@ -526,47 +588,11 @@ void SensorTreePanel::updateStatusLabel()
   }
 
   status_label_->setText(
-    QString("Supported topics: %1 | Available: %2 | Enabled displays: %3")
+    QString("Supported topics: %1 | Visible: %2 | Available: %3 | Enabled displays: %4")
     .arg(static_cast<int>(topics.size()))
+    .arg(static_cast<int>(visible_count))
     .arg(static_cast<int>(available_count))
     .arg(static_cast<int>(enabled_count)));
-}
-
-void SensorTreePanel::syncEnabledTopicsFromTree()
-{
-  persisted_enabled_topics_.clear();
-
-  if (!tree_widget_) {
-    return;
-  }
-
-  std::vector<QTreeWidgetItem *> pending_items;
-  for (int index = 0; index < tree_widget_->topLevelItemCount(); ++index) {
-    if (auto * item = tree_widget_->topLevelItem(index)) {
-      pending_items.push_back(item);
-    }
-  }
-
-  while (!pending_items.empty()) {
-    auto * item = pending_items.back();
-    pending_items.pop_back();
-    if (!item) {
-      continue;
-    }
-
-    const auto item_type = static_cast<TreeItemType>(
-      item->data(kNameColumn, kTreeItemTypeRole).toInt());
-    if (item_type == TreeItemType::Topic && item->checkState(kNameColumn) == Qt::Checked) {
-      const auto topic_name = item->data(kNameColumn, Qt::UserRole).toString().toStdString();
-      if (!topic_name.empty()) {
-        persisted_enabled_topics_.insert(topic_name);
-      }
-    }
-
-    for (int child_index = 0; child_index < item->childCount(); ++child_index) {
-      pending_items.push_back(item->child(child_index));
-    }
-  }
 }
 
 void SensorTreePanel::setAllTopicsEnabled(bool enabled)
@@ -645,6 +671,27 @@ bool SensorTreePanel::shouldGroupStartExpanded(const std::string & group_key) co
   }
 
   return iter->second;
+}
+
+bool SensorTreePanel::shouldShowTopic(const DiscoveredTopic & topic) const
+{
+  if (!show_offline_topics_ && !topic.is_available) {
+    return false;
+  }
+
+  const auto filter = filter_text_.trimmed().toLower();
+  if (filter.isEmpty()) {
+    return true;
+  }
+
+  const QString haystack = QString("%1 %2 %3 %4")
+    .arg(QString::fromStdString(topic.name))
+    .arg(QString::fromStdString(topic.topic_label))
+    .arg(QString::fromStdString(topic.group_label))
+    .arg(QString::fromStdString(topic.message_type))
+    .toLower();
+
+  return haystack.contains(filter);
 }
 
 void SensorTreePanel::rememberGroupExpansionStates()

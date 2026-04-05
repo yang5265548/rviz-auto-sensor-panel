@@ -98,6 +98,8 @@ Repository-level files:
   Covers sensor, navigation, and debug-visualization use cases
 - 勾选后自动创建对应 RViz display  
   Automatically creates matching RViz displays when checked
+- 面板支持搜索过滤与离线 topic 可见性控制  
+  The panel supports search filtering and offline-topic visibility control
 - `Enable All` / `Disable All` / `Auto-enable new topics`  
   `Enable All` / `Disable All` / `Auto-enable new topics`
 - 记住手动关闭过的 topic，避免刷新后立即反弹  

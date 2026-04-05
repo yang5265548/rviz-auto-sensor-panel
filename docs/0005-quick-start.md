@@ -144,6 +144,10 @@ The panel now also supports these lower-effort interactions:
 
 - `Auto-enable new topics`：新发现的支持 topic 自动创建 display  
   `Auto-enable new topics`: automatically create displays for newly discovered supported topics
+- 顶部搜索框：按 topic 名、设备组名或消息类型快速过滤  
+  Top search box: quickly filter by topic name, device-group label, or message type
+- `Show offline`：切换是否显示已记住但当前离线的 topic  
+  `Show offline`: toggle whether remembered-but-currently-offline topics stay visible
 - `Enable All`：一次启用所有已发现 topic  
   `Enable All`: enable all discovered topics at once
 - `Disable All`：一次关闭所有已发现 topic  
