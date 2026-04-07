@@ -67,6 +67,7 @@ Requirements baseline:
 - [Release Readiness / 发布准备度](./docs/0008-release-readiness.md)
 - [Maintainer Workflow / 维护者流程](./docs/0009-maintainer-workflow.md)
 - [Main Merge Checklist / 合并清单](./docs/0010-main-merge-checklist.md)
+- [Colleague Quick Guide / 同事快速指导](./docs/0011-colleague-quick-guide.md)
 
 默认规则配置文件：  
 Default rules configuration file:
