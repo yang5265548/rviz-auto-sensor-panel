@@ -19,13 +19,28 @@ TEST(SensorClassifierTest, classifiesSupportedTypes)
     classifier.classifyMessageType("sensor_msgs/msg/PointCloud2"),
     SensorCategory::PointCloud);
   EXPECT_EQ(
+    classifier.classifyMessageType("nav_msgs/msg/OccupancyGrid"),
+    SensorCategory::Map);
+  EXPECT_EQ(
     classifier.classifyMessageType("nav_msgs/msg/Odometry"),
     SensorCategory::Navigation);
   EXPECT_EQ(
     classifier.classifyMessageType("nav_msgs/msg/Path"),
     SensorCategory::Navigation);
   EXPECT_EQ(
+    classifier.classifyMessageType("geometry_msgs/msg/PoseStamped"),
+    SensorCategory::Navigation);
+  EXPECT_EQ(
+    classifier.classifyMessageType("geometry_msgs/msg/PoseWithCovarianceStamped"),
+    SensorCategory::Navigation);
+  EXPECT_EQ(
     classifier.classifyMessageType("geometry_msgs/msg/PoseArray"),
+    SensorCategory::Navigation);
+  EXPECT_EQ(
+    classifier.classifyMessageType("geometry_msgs/msg/PolygonStamped"),
+    SensorCategory::Navigation);
+  EXPECT_EQ(
+    classifier.classifyMessageType("geometry_msgs/msg/PointStamped"),
     SensorCategory::Navigation);
   EXPECT_EQ(
     classifier.classifyMessageType("visualization_msgs/msg/Marker"),
@@ -58,14 +73,29 @@ TEST(SensorClassifierTest, mapsToRvizDefaultPluginTypes)
     classifier.lookupDisplayType("sensor_msgs/msg/PointCloud2"),
     "rviz_default_plugins/PointCloud2");
   EXPECT_EQ(
+    classifier.lookupDisplayType("nav_msgs/msg/OccupancyGrid"),
+    "rviz_default_plugins/Map");
+  EXPECT_EQ(
     classifier.lookupDisplayType("nav_msgs/msg/Odometry"),
     "rviz_default_plugins/Odometry");
   EXPECT_EQ(
     classifier.lookupDisplayType("nav_msgs/msg/Path"),
     "rviz_default_plugins/Path");
   EXPECT_EQ(
+    classifier.lookupDisplayType("geometry_msgs/msg/PoseStamped"),
+    "rviz_default_plugins/Pose");
+  EXPECT_EQ(
+    classifier.lookupDisplayType("geometry_msgs/msg/PoseWithCovarianceStamped"),
+    "rviz_default_plugins/PoseWithCovariance");
+  EXPECT_EQ(
     classifier.lookupDisplayType("geometry_msgs/msg/PoseArray"),
     "rviz_default_plugins/PoseArray");
+  EXPECT_EQ(
+    classifier.lookupDisplayType("geometry_msgs/msg/PolygonStamped"),
+    "rviz_default_plugins/Polygon");
+  EXPECT_EQ(
+    classifier.lookupDisplayType("geometry_msgs/msg/PointStamped"),
+    "rviz_default_plugins/PointStamped");
   EXPECT_EQ(
     classifier.lookupDisplayType("visualization_msgs/msg/Marker"),
     "rviz_default_plugins/Marker");
@@ -97,6 +127,31 @@ TEST(SensorClassifierTest, derivesFriendlyGroupLabelsFromCommonTopicConventions)
     classifier.classifyTopic("/demo/localization/odom", "nav_msgs/msg/Odometry");
   EXPECT_EQ(localization.category, SensorCategory::Navigation);
   EXPECT_EQ(localization.group_label, "Localization");
+
+  const auto map_topic =
+    classifier.classifyTopic("/map", "nav_msgs/msg/OccupancyGrid");
+  EXPECT_EQ(map_topic.category, SensorCategory::Map);
+  EXPECT_EQ(map_topic.group_label, "Map");
+
+  const auto global_costmap =
+    classifier.classifyTopic("/global_costmap/costmap", "nav_msgs/msg/OccupancyGrid");
+  EXPECT_EQ(global_costmap.category, SensorCategory::Map);
+  EXPECT_EQ(global_costmap.group_label, "Global Map");
+
+  const auto goal_pose =
+    classifier.classifyTopic("/goal_pose", "geometry_msgs/msg/PoseStamped");
+  EXPECT_EQ(goal_pose.category, SensorCategory::Navigation);
+  EXPECT_EQ(goal_pose.group_label, "Goal");
+
+  const auto clicked_point =
+    classifier.classifyTopic("/clicked_point", "geometry_msgs/msg/PointStamped");
+  EXPECT_EQ(clicked_point.category, SensorCategory::Navigation);
+  EXPECT_EQ(clicked_point.group_label, "Clicked");
+
+  const auto initial_pose =
+    classifier.classifyTopic("/initialpose", "geometry_msgs/msg/PoseWithCovarianceStamped");
+  EXPECT_EQ(initial_pose.category, SensorCategory::Navigation);
+  EXPECT_EQ(initial_pose.group_label, "Initialpose");
 
   const auto debug_markers =
     classifier.classifyTopic("/demo/debug/markers", "visualization_msgs/msg/MarkerArray");

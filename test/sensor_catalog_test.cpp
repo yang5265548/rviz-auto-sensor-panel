@@ -42,6 +42,7 @@ TEST(SensorCatalogTest, groupsTopicsByCategory)
     DiscoveredTopic{"/front/scan", "sensor_msgs/msg/LaserScan", SensorCategory::Lidar, true, 1},
     DiscoveredTopic{"/rear/scan", "sensor_msgs/msg/LaserScan", SensorCategory::Lidar, true, 1},
     DiscoveredTopic{"/camera/left/image_raw", "sensor_msgs/msg/Image", SensorCategory::Camera, true, 1},
+    DiscoveredTopic{"/map", "nav_msgs/msg/OccupancyGrid", SensorCategory::Map, true, 1},
     DiscoveredTopic{"/localization/odom", "nav_msgs/msg/Odometry", SensorCategory::Navigation, true, 1},
     DiscoveredTopic{"/debug/markers", "visualization_msgs/msg/MarkerArray", SensorCategory::Visualization, true, 1}
   });
@@ -54,6 +55,7 @@ TEST(SensorCatalogTest, groupsTopicsByCategory)
   ASSERT_EQ(groups.at(SensorCategory::Camera).size(), 1u);
   ASSERT_EQ(groups.at(SensorCategory::Camera)[0].topics.size(), 1u);
   ASSERT_EQ(groups.at(SensorCategory::PointCloud).size(), 0u);
+  ASSERT_EQ(groups.at(SensorCategory::Map).size(), 1u);
   ASSERT_EQ(groups.at(SensorCategory::Navigation).size(), 1u);
   ASSERT_EQ(groups.at(SensorCategory::Visualization).size(), 1u);
 }

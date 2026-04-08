@@ -107,9 +107,14 @@ You need to add it manually:
 - `sensor_msgs/msg/LaserScan`
 - `sensor_msgs/msg/Image`
 - `sensor_msgs/msg/PointCloud2`
+- `nav_msgs/msg/OccupancyGrid`
 - `nav_msgs/msg/Odometry`
 - `nav_msgs/msg/Path`
+- `geometry_msgs/msg/PoseStamped`
+- `geometry_msgs/msg/PoseWithCovarianceStamped`
 - `geometry_msgs/msg/PoseArray`
+- `geometry_msgs/msg/PolygonStamped`
+- `geometry_msgs/msg/PointStamped`
 - `visualization_msgs/msg/Marker`
 - `visualization_msgs/msg/MarkerArray`
 

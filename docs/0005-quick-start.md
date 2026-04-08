@@ -139,8 +139,8 @@ Expected result:
 
 - RViz 左侧 Displays 区域会自动增加 `[Auto]` 开头的 display  
   RViz Displays should automatically gain displays prefixed with `[Auto]`
-- 不需要手动 `Add` `LaserScan`、`Image`、`PointCloud2`、`Odometry`、`Path` 或 `MarkerArray`  
-  You do not need to manually add `LaserScan`, `Image`, `PointCloud2`, `Odometry`, `Path`, or `MarkerArray`
+- 不需要手动 `Add` `LaserScan`、`Image`、`PointCloud2`、`OccupancyGrid`、`Odometry`、`Path`、`PoseStamped`、`PoseWithCovarianceStamped`、`PoseArray`、`PolygonStamped`、`PointStamped`、`Marker` 或 `MarkerArray`  
+  You do not need to manually add `LaserScan`, `Image`, `PointCloud2`, `OccupancyGrid`, `Odometry`, `Path`, `PoseStamped`, `PoseWithCovarianceStamped`, `PoseArray`, `PolygonStamped`, `PointStamped`, `Marker`, or `MarkerArray`
 - 取消勾选时，该 display 会被禁用  
   Unchecking disables the display
 - 面板 `State` 列会显示 publisher 数量；离线保留的 topic 会显示 `Offline`  

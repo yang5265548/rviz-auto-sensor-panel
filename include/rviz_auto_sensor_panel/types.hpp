@@ -13,6 +13,7 @@ enum class SensorCategory
   Lidar,
   Camera,
   PointCloud,
+  Map,
   Navigation,
   Visualization
 };

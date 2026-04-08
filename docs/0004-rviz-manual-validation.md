@@ -56,6 +56,8 @@ Prepare at least these three topic types:
 - `sensor_msgs/msg/LaserScan`
 - `sensor_msgs/msg/Image`
 - `sensor_msgs/msg/PointCloud2`
+- `nav_msgs/msg/OccupancyGrid`
+- `geometry_msgs/msg/PoseStamped`
 
 如果当前机器人系统没有现成 topic，可以先用你自己的测试节点或仿真环境发布。  
 If your robot system does not already provide these topics, use your own test nodes or simulation environment first.
@@ -91,8 +93,8 @@ Expected result:
 预期结果：  
 Expected result:
 
-- 面板中出现 `Lidar`、`Camera`、`Point Cloud`、`Navigation`、`Visualization` 分类  
-  The panel shows `Lidar`, `Camera`, `Point Cloud`, `Navigation`, and `Visualization` categories
+- 面板中出现 `Lidar`、`Camera`、`Point Cloud`、`Map`、`Navigation`、`Visualization` 分类  
+  The panel shows `Lidar`, `Camera`, `Point Cloud`, `Map`, `Navigation`, and `Visualization` categories
 - 对应 topic 出现在分类下  
   Matching topics appear under those categories
 - `State` 列会显示每个 topic 的 publisher 数量  
@@ -106,8 +108,8 @@ Expected result:
    Check a `LaserScan` topic in the tree
 2. 在 RViz 左侧 Displays 区域查看是否新增自动 display  
    Check the RViz Displays area for a new auto-created display
-3. 对 `Image`、`PointCloud2`、`Odometry`、`Path` 或 `MarkerArray` 重复相同步骤  
-   Repeat for `Image`, `PointCloud2`, `Odometry`, `Path`, or `MarkerArray`
+3. 对 `Image`、`PointCloud2`、`OccupancyGrid`、`Odometry`、`Path`、`PoseStamped`、`PoseWithCovarianceStamped`、`PoseArray`、`PolygonStamped`、`PointStamped`、`Marker` 或 `MarkerArray` 重复相同步骤  
+   Repeat for `Image`, `PointCloud2`, `OccupancyGrid`, `Odometry`, `Path`, `PoseStamped`, `PoseWithCovarianceStamped`, `PoseArray`, `PolygonStamped`, `PointStamped`, `Marker`, or `MarkerArray`
 
 预期结果：  
 Expected result:

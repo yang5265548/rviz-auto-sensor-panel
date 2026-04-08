@@ -25,6 +25,11 @@ The current version first identifies sensor categories from message types:
 - `sensor_msgs/msg/LaserScan` -> `Lidar`
 - `sensor_msgs/msg/Image` -> `Camera`
 - `sensor_msgs/msg/PointCloud2` -> `Point Cloud`
+- `nav_msgs/msg/OccupancyGrid` -> `Map`
+- `nav_msgs/msg/Odometry` / `nav_msgs/msg/Path` -> `Navigation`
+- `geometry_msgs/msg/PoseStamped` / `geometry_msgs/msg/PoseWithCovarianceStamped` -> `Navigation`
+- `geometry_msgs/msg/PoseArray` / `geometry_msgs/msg/PolygonStamped` / `geometry_msgs/msg/PointStamped` -> `Navigation`
+- `visualization_msgs/msg/Marker` / `visualization_msgs/msg/MarkerArray` -> `Visualization`
 
 这是插件通用性的基础，因为 ROS 2 官方定义了消息类型，但没有统一规定所有团队必须使用完全相同的设备 topic 名称。  
 This is the foundation of portability because ROS 2 standardizes message types, but it does not require all teams to use identical device topic names.

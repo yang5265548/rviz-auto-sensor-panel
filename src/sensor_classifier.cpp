@@ -23,18 +23,29 @@ namespace
 constexpr char kLaserScanMessageType[] = "sensor_msgs/msg/LaserScan";
 constexpr char kImageMessageType[] = "sensor_msgs/msg/Image";
 constexpr char kPointCloud2MessageType[] = "sensor_msgs/msg/PointCloud2";
+constexpr char kOccupancyGridMessageType[] = "nav_msgs/msg/OccupancyGrid";
 constexpr char kOdometryMessageType[] = "nav_msgs/msg/Odometry";
 constexpr char kPathMessageType[] = "nav_msgs/msg/Path";
+constexpr char kPoseStampedMessageType[] = "geometry_msgs/msg/PoseStamped";
+constexpr char kPoseWithCovarianceStampedMessageType[] =
+  "geometry_msgs/msg/PoseWithCovarianceStamped";
 constexpr char kPoseArrayMessageType[] = "geometry_msgs/msg/PoseArray";
+constexpr char kPolygonStampedMessageType[] = "geometry_msgs/msg/PolygonStamped";
+constexpr char kPointStampedMessageType[] = "geometry_msgs/msg/PointStamped";
 constexpr char kMarkerMessageType[] = "visualization_msgs/msg/Marker";
 constexpr char kMarkerArrayMessageType[] = "visualization_msgs/msg/MarkerArray";
 
 constexpr char kLaserScanDisplayType[] = "rviz_default_plugins/LaserScan";
 constexpr char kImageDisplayType[] = "rviz_default_plugins/Image";
 constexpr char kPointCloud2DisplayType[] = "rviz_default_plugins/PointCloud2";
+constexpr char kMapDisplayType[] = "rviz_default_plugins/Map";
 constexpr char kOdometryDisplayType[] = "rviz_default_plugins/Odometry";
 constexpr char kPathDisplayType[] = "rviz_default_plugins/Path";
+constexpr char kPoseDisplayType[] = "rviz_default_plugins/Pose";
+constexpr char kPoseWithCovarianceDisplayType[] = "rviz_default_plugins/PoseWithCovariance";
 constexpr char kPoseArrayDisplayType[] = "rviz_default_plugins/PoseArray";
+constexpr char kPolygonDisplayType[] = "rviz_default_plugins/Polygon";
+constexpr char kPointStampedDisplayType[] = "rviz_default_plugins/PointStamped";
 constexpr char kMarkerDisplayType[] = "rviz_default_plugins/Marker";
 constexpr char kMarkerArrayDisplayType[] = "rviz_default_plugins/MarkerArray";
 constexpr char kRulesEnvVar[] = "RVIZ_AUTO_SENSOR_PANEL_RULES_FILE";
@@ -305,6 +316,8 @@ std::string categoryLabel(SensorCategory category)
       return "Camera";
     case SensorCategory::PointCloud:
       return "Point Cloud";
+    case SensorCategory::Map:
+      return "Map";
     case SensorCategory::Navigation:
       return "Navigation";
     case SensorCategory::Visualization:
@@ -324,6 +337,8 @@ std::string categoryKey(SensorCategory category)
       return "camera";
     case SensorCategory::PointCloud:
       return "point_cloud";
+    case SensorCategory::Map:
+      return "map";
     case SensorCategory::Navigation:
       return "navigation";
     case SensorCategory::Visualization:
@@ -346,8 +361,13 @@ std::set<std::string> genericSuffixesFor(SensorCategory category)
       };
     case SensorCategory::PointCloud:
       return {"points", "pointcloud", "point_cloud", "velodyne_points", "cloud"};
+    case SensorCategory::Map:
+      return {"map", "costmap", "grid", "occupancy_grid", "updates", "layer", "raw"};
     case SensorCategory::Navigation:
-      return {"odom", "odometry", "path", "posearray", "pose_array", "poses", "plan", "trajectory"};
+      return {
+        "odom", "odometry", "path", "posearray", "pose_array", "poses", "plan", "trajectory",
+        "pose", "point", "footprint"
+      };
     case SensorCategory::Visualization:
       return {"marker", "markers", "markerarray", "marker_array"};
     case SensorCategory::Unknown:
@@ -365,10 +385,13 @@ std::set<std::string> genericTypeWordsFor(SensorCategory category)
       return {"camera", "cam", "image"};
     case SensorCategory::PointCloud:
       return {"pointcloud", "point_cloud", "points", "cloud", "velodyne"};
+    case SensorCategory::Map:
+      return {"map", "costmap", "grid", "occupancygrid", "occupancy_grid", "layer"};
     case SensorCategory::Navigation:
       return {
         "odom", "odometry", "path", "poses",
-        "posearray", "pose_array", "trajectory", "plan", "route"
+        "posearray", "pose_array", "trajectory", "plan", "route",
+        "pose", "point", "goal", "dock", "footprint"
       };
     case SensorCategory::Visualization:
       return {"visualization", "viz", "marker", "markers", "markerarray", "marker_array"};
@@ -387,8 +410,14 @@ std::set<std::string> categorySelfWordsFor(SensorCategory category)
       return {"camera", "cam"};
     case SensorCategory::PointCloud:
       return {"pointcloud", "point_cloud", "cloud", "velodyne"};
+    case SensorCategory::Map:
+      return {"map", "costmap"};
     case SensorCategory::Navigation:
-      return {"navigation", "localization", "planning"};
+      return {
+        "navigation", "localization", "planning", "goal", "clicked", "dock", "footprint",
+        "costmap", "route", "trajectory", "path", "odom", "odometry", "initialpose",
+        "initial", "staging", "detected", "filtered"
+      };
     case SensorCategory::Visualization:
       return {"visualization", "viz"};
     case SensorCategory::Unknown:
@@ -517,10 +546,18 @@ SensorCategory SensorClassifier::classifyMessageType(const std::string & message
     return SensorCategory::PointCloud;
   }
 
+  if (message_type == kOccupancyGridMessageType) {
+    return SensorCategory::Map;
+  }
+
   if (
+    message_type == kPoseStampedMessageType ||
+    message_type == kPoseWithCovarianceStampedMessageType ||
     message_type == kOdometryMessageType ||
     message_type == kPathMessageType ||
-    message_type == kPoseArrayMessageType)
+    message_type == kPoseArrayMessageType ||
+    message_type == kPolygonStampedMessageType ||
+    message_type == kPointStampedMessageType)
   {
     return SensorCategory::Navigation;
   }
@@ -561,6 +598,18 @@ std::string SensorClassifier::lookupDisplayType(const std::string & message_type
     return kPointCloud2DisplayType;
   }
 
+  if (message_type == kOccupancyGridMessageType) {
+    return kMapDisplayType;
+  }
+
+  if (message_type == kPoseStampedMessageType) {
+    return kPoseDisplayType;
+  }
+
+  if (message_type == kPoseWithCovarianceStampedMessageType) {
+    return kPoseWithCovarianceDisplayType;
+  }
+
   if (message_type == kOdometryMessageType) {
     return kOdometryDisplayType;
   }
@@ -571,6 +620,14 @@ std::string SensorClassifier::lookupDisplayType(const std::string & message_type
 
   if (message_type == kPoseArrayMessageType) {
     return kPoseArrayDisplayType;
+  }
+
+  if (message_type == kPolygonStampedMessageType) {
+    return kPolygonDisplayType;
+  }
+
+  if (message_type == kPointStampedMessageType) {
+    return kPointStampedDisplayType;
   }
 
   if (message_type == kMarkerMessageType) {
@@ -600,6 +657,7 @@ std::vector<SensorCategory> supportedCategories()
     SensorCategory::Lidar,
     SensorCategory::Camera,
     SensorCategory::PointCloud,
+    SensorCategory::Map,
     SensorCategory::Navigation,
     SensorCategory::Visualization
   };

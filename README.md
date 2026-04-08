@@ -43,9 +43,14 @@ Currently supported message types:
 - `sensor_msgs/msg/LaserScan`
 - `sensor_msgs/msg/Image`
 - `sensor_msgs/msg/PointCloud2`
+- `nav_msgs/msg/OccupancyGrid`
 - `nav_msgs/msg/Odometry`
 - `nav_msgs/msg/Path`
+- `geometry_msgs/msg/PoseStamped`
+- `geometry_msgs/msg/PoseWithCovarianceStamped`
 - `geometry_msgs/msg/PoseArray`
+- `geometry_msgs/msg/PolygonStamped`
+- `geometry_msgs/msg/PointStamped`
 - `visualization_msgs/msg/Marker`
 - `visualization_msgs/msg/MarkerArray`
 
@@ -94,12 +99,12 @@ Repository-level files:
 
 ## 当前已具备 | What Works Today
 
-- 自动发现 `LaserScan`、`Image`、`PointCloud2`、`Odometry`、`Path`、`PoseArray`、`Marker`、`MarkerArray`  
-  Automatically discovers `LaserScan`, `Image`, `PointCloud2`, `Odometry`, `Path`, `PoseArray`, `Marker`, and `MarkerArray`
+- 自动发现 `LaserScan`、`Image`、`PointCloud2`、`OccupancyGrid`、`Odometry`、`Path`、`PoseStamped`、`PoseWithCovarianceStamped`、`PoseArray`、`PolygonStamped`、`PointStamped`、`Marker`、`MarkerArray`  
+  Automatically discovers `LaserScan`, `Image`, `PointCloud2`, `OccupancyGrid`, `Odometry`, `Path`, `PoseStamped`, `PoseWithCovarianceStamped`, `PoseArray`, `PolygonStamped`, `PointStamped`, `Marker`, and `MarkerArray`
 - 设备树分组与更友好的设备命名  
   Groups topics into a device tree with friendlier labels
-- 覆盖传感器、导航和调试可视化三个使用场景  
-  Covers sensor, navigation, and debug-visualization use cases
+- 覆盖传感器、地图、导航和调试可视化四个使用场景  
+  Covers sensor, map, navigation, and debug-visualization use cases
 - 勾选后自动创建对应 RViz display  
   Automatically creates matching RViz displays when checked
 - 面板支持搜索过滤与离线 topic 可见性控制  
