@@ -32,10 +32,10 @@ resolve_fixed_frame() {
     return 0
   fi
 
-  if [[ "${PROMPT_FOR_MODE}" == "true" && -t 0 && -t 1 ]]; then
+  if [[ "${PROMPT_FOR_MODE}" == "true" && -t 0 ]]; then
     local answer=""
-    printf 'Use SLAM mode fixed frame (map)? [Y/n]: ' > /dev/tty
-    read -r answer < /dev/tty || true
+    printf 'Use SLAM mode fixed frame (map)? [Y/n]: '
+    read -r answer || true
     answer="$(printf '%s' "${answer}" | tr '[:upper:]' '[:lower:]')"
     case "${answer}" in
       ""|y|yes)
