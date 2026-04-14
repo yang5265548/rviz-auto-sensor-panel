@@ -99,6 +99,9 @@ If you do not want the interactive prompt, you can specify it directly:
 ./scripts/run_rviz_preset.sh --fixed-frame odom
 ```
 
+注意：在终端里直接运行 `./scripts/run_rviz_preset.sh` 时，脚本默认会先询问；环境变量覆盖主要用于其他脚本或自动化场景。  
+Note: when you run `./scripts/run_rviz_preset.sh` directly in a terminal, the script prompts first by default; environment-variable overrides are intended primarily for scripts and automation.
+
 ## 6. 如果你只想快速试用 | If You Just Want a Quick Demo
 
 直接执行：  

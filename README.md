@@ -11,8 +11,8 @@ This project aims to reduce repetitive RViz setup by automatically discovering s
 脚本现在默认会自动探测常见的 ROS 2 安装位置；如果你的机器使用自定义安装路径，可以设置 `RVIZ_AUTO_SENSOR_PANEL_ROS_SETUP=/absolute/path/to/setup.bash`。  
 The scripts now auto-detect common ROS 2 install locations; if your machine uses a custom install path, set `RVIZ_AUTO_SENSOR_PANEL_ROS_SETUP=/absolute/path/to/setup.bash`.
 
-`./scripts/run_rviz_preset.sh` 在交互式启动时会询问是否使用 SLAM 模式：SLAM 默认用 `map`，非 SLAM 默认用 `base_link`。你也可以用 `RVIZ_AUTO_SENSOR_PANEL_FIXED_FRAME` 或 `--fixed-frame` 明确指定。  
-`./scripts/run_rviz_preset.sh` prompts for SLAM mode during interactive launches: SLAM defaults to `map`, while non-SLAM defaults to `base_link`. You can also force a frame with `RVIZ_AUTO_SENSOR_PANEL_FIXED_FRAME` or `--fixed-frame`.
+`./scripts/run_rviz_preset.sh` 在终端里直接启动时会询问是否使用 SLAM 模式：SLAM 默认用 `map`，非 SLAM 默认用 `base_link`。你也可以用 `--slam-mode`、`--no-slam-mode` 或 `--fixed-frame` 明确指定；环境变量更适合非交互脚本。  
+`./scripts/run_rviz_preset.sh` prompts for SLAM mode when launched directly from a terminal: SLAM uses `map`, while non-SLAM uses `base_link`. You can also force the choice with `--slam-mode`, `--no-slam-mode`, or `--fixed-frame`; environment variables are better suited to non-interactive scripts.
 
 ## 愿景 | Vision
 

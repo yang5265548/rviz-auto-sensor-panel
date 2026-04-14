@@ -87,8 +87,8 @@ If you want to start RViz with the project preset instead of a blank default lay
 ./scripts/run_rviz_preset.sh
 ```
 
-交互式启动时，脚本会询问是否是 SLAM 模式：
-During interactive startup, the script asks whether this is a SLAM session:
+直接在终端里执行时，脚本会询问是否是 SLAM 模式：
+When executed directly in a terminal, the script asks whether this is a SLAM session:
 
 - 选择 `Yes`：使用 `Fixed Frame = map`
   Choose `Yes`: use `Fixed Frame = map`
@@ -103,6 +103,9 @@ If you want to skip the prompt, you can specify it explicitly:
 ./scripts/run_rviz_preset.sh --no-slam-mode
 ./scripts/run_rviz_preset.sh --fixed-frame odom
 ```
+
+环境变量 `RVIZ_AUTO_SENSOR_PANEL_SLAM_MODE` 和 `RVIZ_AUTO_SENSOR_PANEL_FIXED_FRAME` 更适合非交互脚本；终端里直接运行时，默认优先弹出询问。  
+The `RVIZ_AUTO_SENSOR_PANEL_SLAM_MODE` and `RVIZ_AUTO_SENSOR_PANEL_FIXED_FRAME` environment variables are better suited to non-interactive scripts; when launched directly from a terminal, the prompt takes precedence by default.
 
 如果你想带自定义分组规则一起启动 demo，可以运行：  
 If you want to launch the demo together with custom grouping rules, run:

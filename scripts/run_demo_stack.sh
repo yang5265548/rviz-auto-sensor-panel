@@ -55,5 +55,4 @@ if [[ -n "${RULES_FILE}" ]]; then
   export RVIZ_AUTO_SENSOR_PANEL_RULES_FILE="${RULES_FILE}"
 fi
 
-export RVIZ_AUTO_SENSOR_PANEL_SLAM_MODE=true
-exec "${ROOT_DIR}/scripts/run_rviz_preset.sh"
+exec "${ROOT_DIR}/scripts/run_rviz_preset.sh" --slam-mode

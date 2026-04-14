@@ -8,6 +8,7 @@ RVIZ_CONFIG="${ROOT_DIR}/config/default_demo.rviz"
 RVIZ_HOME_DIR="${ROOT_DIR}/.rviz_home"
 FIXED_FRAME_OVERRIDE="${RVIZ_AUTO_SENSOR_PANEL_FIXED_FRAME:-}"
 SLAM_MODE_OVERRIDE="${RVIZ_AUTO_SENSOR_PANEL_SLAM_MODE:-}"
+PROMPT_FOR_MODE="true"
 
 usage() {
   echo "Usage: ./scripts/run_rviz_preset.sh [--fixed-frame FRAME] [--slam-mode|--no-slam-mode] [config.rviz]"
@@ -31,21 +32,7 @@ resolve_fixed_frame() {
     return 0
   fi
 
-  if [[ -n "${SLAM_MODE_OVERRIDE}" ]]; then
-    local normalized
-    if normalized="$(normalize_boolean "${SLAM_MODE_OVERRIDE}")"; then
-      if [[ "${normalized}" == "true" ]]; then
-        printf '%s\n' "map"
-      else
-        printf '%s\n' "base_link"
-      fi
-      return 0
-    fi
-    echo "Invalid RVIZ_AUTO_SENSOR_PANEL_SLAM_MODE value: ${SLAM_MODE_OVERRIDE}" >&2
-    exit 1
-  fi
-
-  if [[ -t 0 && -t 1 ]]; then
+  if [[ "${PROMPT_FOR_MODE}" == "true" && -t 0 && -t 1 ]]; then
     local answer=""
     printf 'Use SLAM mode fixed frame (map)? [Y/n]: ' > /dev/tty
     read -r answer < /dev/tty || true
@@ -66,6 +53,20 @@ resolve_fixed_frame() {
     esac
   fi
 
+  if [[ -n "${SLAM_MODE_OVERRIDE}" ]]; then
+    local normalized
+    if normalized="$(normalize_boolean "${SLAM_MODE_OVERRIDE}")"; then
+      if [[ "${normalized}" == "true" ]]; then
+        printf '%s\n' "map"
+      else
+        printf '%s\n' "base_link"
+      fi
+      return 0
+    fi
+    echo "Invalid RVIZ_AUTO_SENSOR_PANEL_SLAM_MODE value: ${SLAM_MODE_OVERRIDE}" >&2
+    exit 1
+  fi
+
   printf '%s\n' "map"
 }
 
@@ -81,10 +82,12 @@ while [[ $# -gt 0 ]]; do
       ;;
     --slam-mode)
       SLAM_MODE_OVERRIDE="true"
+      PROMPT_FOR_MODE="false"
       shift
       ;;
     --no-slam-mode)
       SLAM_MODE_OVERRIDE="false"
+      PROMPT_FOR_MODE="false"
       shift
       ;;
     -h|--help)

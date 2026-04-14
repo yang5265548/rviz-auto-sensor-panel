@@ -94,6 +94,9 @@ If you do not want the prompt, specify it directly:
 ./scripts/run_rviz_preset.sh --fixed-frame odom
 ```
 
+直接在终端里执行 `./scripts/run_rviz_preset.sh` 时，默认会先询问；环境变量方式主要用于非交互脚本。  
+When `./scripts/run_rviz_preset.sh` is run directly in a terminal, it prompts first by default; environment-variable control is mainly intended for non-interactive scripts.
+
 ## 5. 普通 RViz 模式，但保留插件 | Plain RViz with the Plugin
 
 如果你想打开最普通的 RViz 界面，而不是加载项目 preset，可以执行：  
