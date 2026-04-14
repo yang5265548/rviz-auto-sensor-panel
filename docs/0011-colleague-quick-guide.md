@@ -76,8 +76,23 @@ This command will:
   Open RViz with the default preset
 - 自动加载 `SensorTreePanel`  
   Load `SensorTreePanel` automatically
-- 自动把 `Fixed Frame` 设成 `map`  
-  Set `Fixed Frame` to `map`
+- 询问是否是 SLAM 模式  
+  Ask whether this is a SLAM session
+
+选择规则：  
+Selection rule:
+
+- `Yes` -> `Fixed Frame = map`
+- `No` -> `Fixed Frame = base_link`
+
+如果你不想交互，可以直接指定：  
+If you do not want the prompt, specify it directly:
+
+```bash
+./scripts/run_rviz_preset.sh --slam-mode
+./scripts/run_rviz_preset.sh --no-slam-mode
+./scripts/run_rviz_preset.sh --fixed-frame odom
+```
 
 ## 5. 普通 RViz 模式，但保留插件 | Plain RViz with the Plugin
 

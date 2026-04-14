@@ -79,10 +79,25 @@ This preset will automatically:
 
 - 加载 `SensorTreePanel`
   Load `SensorTreePanel`
-- 将 `Fixed Frame` 设为 `map`
-  Set `Fixed Frame` to `map`
+- 询问是否按 SLAM 模式启动
+  Ask whether to start in SLAM mode
 - 保留常用 RViz 基础面板  
   Keep the standard RViz base panels
+
+如果你选择：
+If you choose:
+
+- `SLAM mode = yes` -> `Fixed Frame = map`
+- `SLAM mode = no` -> `Fixed Frame = base_link`
+
+如果你不想交互式选择，也可以直接指定：
+If you do not want the interactive prompt, you can specify it directly:
+
+```bash
+./scripts/run_rviz_preset.sh --slam-mode
+./scripts/run_rviz_preset.sh --no-slam-mode
+./scripts/run_rviz_preset.sh --fixed-frame odom
+```
 
 ## 6. 如果你只想快速试用 | If You Just Want a Quick Demo
 
@@ -102,9 +117,10 @@ It starts the demo publisher and then opens RViz with the default preset.
 After launch, you should directly see:
 
 - `SensorTreePanel`
-- `Lidar`、`Camera`、`Point Cloud`、`Navigation`、`Visualization` 分类  
-  `Lidar`, `Camera`, `Point Cloud`, `Navigation`, and `Visualization` categories
-- `Fixed Frame = map`
+- `Lidar`、`Camera`、`Point Cloud`、`Map`、`Navigation`、`Visualization` 分类  
+  `Lidar`, `Camera`, `Point Cloud`, `Map`, `Navigation`, and `Visualization` categories
+- `Fixed Frame` 按启动选择决定  
+  `Fixed Frame` set according to your startup choice
 
 接下来只需要：  
 Then you only need to:

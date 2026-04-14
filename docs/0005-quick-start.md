@@ -28,8 +28,8 @@ If you want the fastest way to open RViz with demo data already running, you can
 ./scripts/run_demo_stack.sh
 ```
 
-这个命令会使用项目自带的 RViz 预设，因此默认会直接带出 `SensorTreePanel`，并把 `Fixed Frame` 设成 `map`。  
-This command uses the project RViz preset, so it should open with `SensorTreePanel` already loaded and `Fixed Frame` already set to `map`.
+这个命令会使用项目自带的 RViz 预设，demo 模式下会直接带出 `SensorTreePanel`，并固定使用 `Fixed Frame = map`。  
+This command uses the project RViz preset. In demo mode it opens with `SensorTreePanel` already loaded and forces `Fixed Frame = map`.
 
 ## 3. 启动演示数据 | Start Demo Topics
 
@@ -87,6 +87,23 @@ If you want to start RViz with the project preset instead of a blank default lay
 ./scripts/run_rviz_preset.sh
 ```
 
+交互式启动时，脚本会询问是否是 SLAM 模式：
+During interactive startup, the script asks whether this is a SLAM session:
+
+- 选择 `Yes`：使用 `Fixed Frame = map`
+  Choose `Yes`: use `Fixed Frame = map`
+- 选择 `No`：使用 `Fixed Frame = base_link`
+  Choose `No`: use `Fixed Frame = base_link`
+
+如果你想跳过询问，也可以显式指定：
+If you want to skip the prompt, you can specify it explicitly:
+
+```bash
+./scripts/run_rviz_preset.sh --slam-mode
+./scripts/run_rviz_preset.sh --no-slam-mode
+./scripts/run_rviz_preset.sh --fixed-frame odom
+```
+
 如果你想带自定义分组规则一起启动 demo，可以运行：  
 If you want to launch the demo together with custom grouping rules, run:
 
@@ -110,8 +127,8 @@ If you started through `./scripts/run_rviz_local.sh`, then inside RViz:
 预期结果：  
 Expected result:
 
-- 你会看到 `Lidar`、`Camera`、`Point Cloud`、`Navigation`、`Visualization` 五个分类  
-  You should see `Lidar`, `Camera`, `Point Cloud`, `Navigation`, and `Visualization` categories
+- 你会看到 `Lidar`、`Camera`、`Point Cloud`、`Map`、`Navigation`、`Visualization` 六个分类  
+  You should see `Lidar`, `Camera`, `Point Cloud`, `Map`, `Navigation`, and `Visualization` categories
 - 每个分类下会进一步显示更友好的设备组，例如 `Front Lidar`、`Left Camera`  
   Each category should further show friendlier device groups such as `Front Lidar` and `Left Camera`
 - 设备组下面的 topic 行会优先显示叶子名，例如 `scan`、`image_raw`、`points`  
@@ -119,8 +136,13 @@ Expected result:
 - 演示 topics 会自动出现在树里  
   The demo topics should appear automatically in the tree
 
-建议把 `Global Options -> Fixed Frame` 设置为 `map`。  
-It is recommended to set `Global Options -> Fixed Frame` to `map`.
+如果你不是通过 preset 启动，建议按场景选择：
+If you are not using the preset, choose based on the session type:
+
+- SLAM / navigation：`map`
+  SLAM / navigation: `map`
+- 纯本体或局部传感器调试：`base_link`
+  Local robot-body or sensor debugging: `base_link`
 
 ## 6. 检测插件是否工作 | How to Verify It Works
 
