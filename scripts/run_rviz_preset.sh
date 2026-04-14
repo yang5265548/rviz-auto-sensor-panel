@@ -34,7 +34,7 @@ resolve_fixed_frame() {
 
   if [[ "${PROMPT_FOR_MODE}" == "true" && -t 0 ]]; then
     local answer=""
-    printf 'Use SLAM mode fixed frame (map)? [Y/n]: '
+    printf 'Use SLAM mode fixed frame (map)? [Y/n]: ' >&2
     read -r answer || true
     answer="$(printf '%s' "${answer}" | tr '[:upper:]' '[:lower:]')"
     case "${answer}" in
